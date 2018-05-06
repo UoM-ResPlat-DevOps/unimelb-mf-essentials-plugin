@@ -42,6 +42,15 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
         println("    local url=\"${URI}&id=${id}\"");
         println("    local out=${DIR}/${path}");
         println("    local overwrite=" + overwrite());
+        if(!overwrite()) {
+            println("    if [[ -f \"${out}\" ]]; then");
+            println("        echo \"File: ${out} alread exists. Skipped.\"");
+            println("        return 0");
+            println("    fi");
+        }
+        if(verbose()) {
+            println("    echo \"downloading file: ${out}\"");
+        }
         println("    if [[ ! -z $(which curl) ]]; then");
         println("        curl --create-dirs -o \"${out}\" ${url}");
         println("    else");
