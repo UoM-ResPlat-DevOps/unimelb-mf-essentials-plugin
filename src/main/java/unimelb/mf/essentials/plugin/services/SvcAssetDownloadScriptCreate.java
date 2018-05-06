@@ -33,11 +33,24 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
             return name().toLowerCase();
         }
 
-        public String scriptFileExtension() {
+        public String appendScriptFileExtension(String scriptFile) {
+            if (scriptFile == null) {
+                return null;
+            }
             if (this == WINDOWS) {
-                return "cmd";
+                if (scriptFile.toLowerCase().endsWith(".cmd") || scriptFile.toLowerCase().endsWith(".bat")) {
+                    return scriptFile;
+                } else {
+                    return scriptFile + ".cmd";
+                }
+            } else if (this == UNIX) {
+                if (scriptFile.toLowerCase().endsWith(".sh")) {
+                    return scriptFile;
+                } else {
+                    return scriptFile + ".sh";
+                }
             } else {
-                return "sh";
+                return scriptFile;
             }
         }
 
@@ -153,10 +166,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
 
     private void addScript(TargetOS target, String name, ServerDetails serverDetails, String token, String where,
             Collection<String> namespaces, ArchiveOutput ao) throws Throwable {
-        String fileName = name;
-        if (!fileName.endsWith("." + target.scriptFileExtension())) {
-            fileName = fileName + "." + target.scriptFileExtension();
-        }
+        String fileName = target.appendScriptFileExtension(name);
         File tf = PluginTask.createTemporaryFile(fileName);
         try {
             OutputStream out = new BufferedOutputStream(new FileOutputStream(tf));
