@@ -1,4 +1,4 @@
-package unimelb.mf.essentials.plugin.download;
+package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 
@@ -7,14 +7,15 @@ import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScriptWriter {
 
-    public AssetDownloadShellUnixScriptWriter(ServerDetails serverDetails, String token, OutputStream os)
-            throws Throwable {
-        super(serverDetails, token, os, false, LineSeparator.UNIX);
+    public AssetDownloadShellUnixScriptWriter(ServerDetails serverDetails, String token, int pageSize, boolean overwrite,
+            boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, pageSize, overwrite, verbose, os, false, LineSeparator.UNIX);
     }
 
     @Override
     protected void writeHead() throws Throwable {
         println("#!/bin/bash");
+                
         /*
          * output directory
          */
@@ -38,8 +39,9 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
         println("download() {");
         println("    local id=$1");
         println("    local path=$2");
-        println("    local url=${URI}&id=${id}");
+        println("    local url=\"${URI}&id=${id}\"");
         println("    local out=${DIR}/${path}");
+        println("    local overwrite=" + overwrite());
         println("    if [[ ! -z $(which curl) ]]; then");
         println("        curl --create-dirs -o \"${out}\" ${url}");
         println("    else");

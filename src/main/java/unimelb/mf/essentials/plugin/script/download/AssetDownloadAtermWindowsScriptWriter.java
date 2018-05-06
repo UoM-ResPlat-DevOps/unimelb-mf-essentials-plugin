@@ -1,4 +1,4 @@
-package unimelb.mf.essentials.plugin.download;
+package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 
@@ -7,9 +7,9 @@ import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScriptWriter {
 
-    public AssetDownloadAtermWindowsScriptWriter(ServerDetails serverDetails, String token, OutputStream os)
-            throws Throwable {
-        super(serverDetails, token, os, false, LineSeparator.WINDOWS);
+    public AssetDownloadAtermWindowsScriptWriter(ServerDetails serverDetails, String token, int ncsr, boolean overwrite,
+            boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, ncsr, overwrite, verbose, os, false, LineSeparator.WINDOWS);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println();
         println("DEL \"%MFLUX_CFG%\"");
         println("DEL \"%MFLUX_ATERM%\"");
-        
+
         /*
          * download function
          */

@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
@@ -32,18 +34,35 @@ public abstract class ClientScriptWriter extends PrintWriter {
 
     private boolean _closed = false;
 
-    protected ClientScriptWriter(ServerDetails serverDetails, String token, String tokenApp, OutputStream os,
-            boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
+    private Map<String, Object> _args;
+
+    protected ClientScriptWriter(ServerDetails serverDetails, String token, String tokenApp, Map<String, Object> args,
+            OutputStream os, boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
         super(new BufferedWriter(new OutputStreamWriter(os, "UTF-8")), autoFlush);
         _serverDetails = serverDetails;
         _token = token;
         _tokenApp = tokenApp;
+        _args = new LinkedHashMap<String, Object>();
+        if (args != null) {
+            _args.putAll(args);
+        }
         _autoFlush = autoFlush;
         _lineSeparator = lineSeparator != null && !lineSeparator.value().equals(System.getProperty("line.separator"))
                 ? lineSeparator
                 : null;
-        initialize();
         writeHead();
+    }
+
+    protected Map<String, Object> args() {
+        return _args;
+    }
+
+    protected Object argValue(String argName) {
+        return _args.get(argName);
+    }
+
+    protected void setArg(String argName, Object argValue) {
+        _args.put(argName, argValue);
     }
 
     protected void initialize() {

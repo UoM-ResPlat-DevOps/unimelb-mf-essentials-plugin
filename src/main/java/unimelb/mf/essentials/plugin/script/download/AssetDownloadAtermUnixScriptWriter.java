@@ -1,4 +1,4 @@
-package unimelb.mf.essentials.plugin.download;
+package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 
@@ -7,9 +7,9 @@ import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScriptWriter {
 
-    public AssetDownloadAtermUnixScriptWriter(ServerDetails serverDetails, String token, OutputStream os)
-            throws Throwable {
-        super(serverDetails, token, os, false, LineSeparator.UNIX);
+    public AssetDownloadAtermUnixScriptWriter(ServerDetails serverDetails, String token, int ncsr, boolean overwrite,
+            boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, ncsr, overwrite, verbose, os, false, LineSeparator.UNIX);
     }
 
     @Override
@@ -54,13 +54,15 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
         println();
         println("download_namespace() {");
         println("    local namespace=$1");
-        println("    java -jar -Dmf.cfg=${MFLUX_CFG} ${MFLUX_ATERM} nogui download -filename-collisions skip -ncsr "
+        println("    java -jar -Dmf.cfg=${MFLUX_CFG} ${MFLUX_ATERM} nogui download -filename-collisions "
+                + (overwrite() ? "overwrite" : "skip") + " -verbose " + verbose() + " -ncsr "
                 + numberOfConcurrentServerRequests() + " -namespace \"${namespace}\" \"${DIR}\"");
         println("}");
         println();
         println("download_where() {");
         println("    local where=$1");
-        println("    java -jar -Dmf.cfg=${MFLUX_CFG} ${MFLUX_ATERM} nogui download -filename-collisions skip -ncsr "
+        println("    java -jar -Dmf.cfg=${MFLUX_CFG} ${MFLUX_ATERM} nogui download -filename-collisions "
+                + (overwrite() ? "overwrite" : "skip") + " -verbose " + verbose() + "-ncsr "
                 + numberOfConcurrentServerRequests() + " -where \"${where}\" \"${DIR}\"");
         println("}");
 

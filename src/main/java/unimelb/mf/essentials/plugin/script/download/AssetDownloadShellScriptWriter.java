@@ -1,4 +1,4 @@
-package unimelb.mf.essentials.plugin.download;
+package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 import java.net.URI;
@@ -11,6 +11,7 @@ import arc.xml.XmlDocMaker;
 import unimelb.mf.essentials.plugin.script.ClientScriptWriter;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadScriptCreate.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
+import unimelb.utils.MapUtils;
 import unimelb.utils.PathUtils;
 import unimelb.utils.URIBuilder;
 
@@ -21,19 +22,41 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
     public static final String TOKEN_TAG = "UNIMELB_DOWNLOAD_SHELL_SCRIPT";
     public static final int DEFAULT_PAGE_SIZE = 10000;
 
-    private int _pageSize = DEFAULT_PAGE_SIZE;
+    public static final String ARG_PAGE_SIZE = "page-size";
+    public static final String ARG_OVERWRITE = "overwrite";
+    public static final String ARG_VERBOSE = "verbose";
 
-    protected AssetDownloadShellScriptWriter(ServerDetails serverDetails, String token, OutputStream os,
-            boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
-        super(serverDetails, token, TOKEN_APP, os, autoFlush, lineSeparator);
-        _pageSize = DEFAULT_PAGE_SIZE;
+    protected AssetDownloadShellScriptWriter(ServerDetails serverDetails, String token, int pageSize, boolean overwrite,
+            boolean verbose, OutputStream os, boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
+        super(serverDetails, token, TOKEN_APP,
+                MapUtils.createMap(new String[] { ARG_PAGE_SIZE, ARG_OVERWRITE, ARG_VERBOSE },
+                        new Object[] { pageSize < 1 ? DEFAULT_PAGE_SIZE : pageSize, overwrite, verbose }),
+                os, autoFlush, lineSeparator);
     }
 
-    public void setPageSize(int pageSize) {
-        if (pageSize < 1) {
-            _pageSize = 1;
+    public int pageSize() {
+        Integer pageSize = (Integer) argValue(ARG_PAGE_SIZE);
+        if (pageSize == null || pageSize < 1) {
+            return DEFAULT_PAGE_SIZE;
+        }
+        return pageSize;
+    }
+
+    public boolean verbose() {
+        Boolean verbose = (Boolean) argValue(ARG_VERBOSE);
+        if (verbose == null) {
+            return false;
         } else {
-            _pageSize = pageSize;
+            return verbose;
+        }
+    }
+
+    public boolean overwrite() {
+        Boolean overwrite = (Boolean) argValue(ARG_OVERWRITE);
+        if (overwrite == null) {
+            return false;
+        } else {
+            return overwrite;
         }
     }
 
@@ -63,7 +86,7 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
             XmlDocMaker dm = new XmlDocMaker("args");
             dm.add("where", where);
             dm.add("action", "get-path");
-            dm.add("size", _pageSize);
+            dm.add("size", pageSize());
             dm.add("idx", idx);
             XmlDoc.Element re = executor.execute("asset.query", dm.root());
             List<XmlDoc.Element> pes = re.elements("path");
@@ -99,9 +122,10 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
     }
 
     public static AssetDownloadShellScriptWriter create(TargetOS target, ServerDetails serverDetails, String token,
-            OutputStream out) throws Throwable {
-        return target == TargetOS.UNIX ? new AssetDownloadShellUnixScriptWriter(serverDetails, token, out)
-                : new AssetDownloadShellWindowsScriptWriter(serverDetails, token, out);
+            int pageSize, boolean overwrite, boolean verbose, OutputStream out) throws Throwable {
+        return target == TargetOS.UNIX
+                ? new AssetDownloadShellUnixScriptWriter(serverDetails, token, pageSize, overwrite, verbose, out)
+                : new AssetDownloadShellWindowsScriptWriter(serverDetails, token, pageSize, overwrite, verbose, out);
     }
 
 }

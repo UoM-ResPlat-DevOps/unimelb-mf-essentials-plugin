@@ -3,7 +3,10 @@ package unimelb.mf.essentials.plugin.services;
 import java.io.OutputStream;
 import java.util.Collection;
 
-import unimelb.mf.essentials.plugin.download.AssetDownloadAtermScriptWriter;
+import arc.mf.plugin.dtype.BooleanType;
+import arc.mf.plugin.dtype.IntegerType;
+import arc.xml.XmlDoc;
+import unimelb.mf.essentials.plugin.script.download.AssetDownloadAtermScriptWriter;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCreate {
@@ -14,6 +17,12 @@ public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCre
 
     public SvcAssetDownloadAtermScriptCreate() {
         super();
+        this.defn.add(new Interface.Element("ncsr", IntegerType.POSITIVE_ONE,
+                "Number of concurrent server requests. Defaults to 1", 0, 1));
+        this.defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,
+                "Whether or not overwrite existing files. Defaults to false", 0, 1));
+        this.defn.add(new Interface.Element("verbose", BooleanType.DEFAULT,
+                "Whether or not display the files being downloaded. Defaults to false", 0, 1));
     }
 
     @Override
@@ -27,9 +36,13 @@ public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCre
     }
 
     @Override
-    protected void generateScript(TargetOS target, ServerDetails serverDetails, String token, String where,
-            Collection<String> namespaces, OutputStream out) throws Throwable {
-        AssetDownloadAtermScriptWriter w = AssetDownloadAtermScriptWriter.create(target, serverDetails, token, out);
+    protected void generateScript(XmlDoc.Element args, TargetOS target, ServerDetails serverDetails, String token,
+            String where, Collection<String> namespaces, OutputStream out) throws Throwable {
+        int ncsr = args.intValue("ncsr", 1);
+        boolean overwrite = args.booleanValue("overwrite", false);
+        boolean verbose = args.booleanValue("verbose", false);
+        AssetDownloadAtermScriptWriter w = AssetDownloadAtermScriptWriter.create(target, serverDetails, token, ncsr,
+                overwrite, verbose, out);
         try {
             if (where != null) {
                 w.addQuery(where);

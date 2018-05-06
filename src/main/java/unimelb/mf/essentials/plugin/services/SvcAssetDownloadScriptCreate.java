@@ -125,7 +125,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
     }
 
     @Override
-    public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
+    public void execute(final Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
         final String where = args.value("where");
         final Collection<String> namespaces = args.values("namespace");
         if (where == null && (namespaces == null || namespaces.isEmpty())) {
@@ -145,10 +145,10 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
                     ArchiveOutput ao = ArchiveRegistry.createOutput(pos, "application/zip", 6, null);
                     try {
                         if (target == null || target == TargetOS.UNIX) {
-                            addScript(TargetOS.UNIX, name, serverDetails, token, where, namespaces, ao);
+                            addScript(TargetOS.UNIX, name, serverDetails, token, where, namespaces, ao, args);
                         }
                         if (target == null || target == TargetOS.WINDOWS) {
-                            addScript(TargetOS.WINDOWS, name, serverDetails, token, where, namespaces, ao);
+                            addScript(TargetOS.WINDOWS, name, serverDetails, token, where, namespaces, ao, args);
                         }
                     } finally {
                         ao.close();
@@ -165,13 +165,13 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
     }
 
     private void addScript(TargetOS target, String name, ServerDetails serverDetails, String token, String where,
-            Collection<String> namespaces, ArchiveOutput ao) throws Throwable {
+            Collection<String> namespaces, ArchiveOutput ao, XmlDoc.Element args) throws Throwable {
         String fileName = target.appendScriptFileExtension(name);
         File tf = PluginTask.createTemporaryFile(fileName);
         try {
             OutputStream out = new BufferedOutputStream(new FileOutputStream(tf));
             try {
-                generateScript(target, serverDetails, token, where, namespaces, out);
+                generateScript(args, target, serverDetails, token, where, namespaces, out);
             } finally {
                 out.close();
             }
@@ -181,8 +181,8 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         }
     }
 
-    protected abstract void generateScript(TargetOS target, ServerDetails serverDetails, String token, String where,
-            Collection<String> namespaces, OutputStream out) throws Throwable;
+    protected abstract void generateScript(XmlDoc.Element args, TargetOS target, ServerDetails serverDetails,
+            String token, String where, Collection<String> namespaces, OutputStream out) throws Throwable;
 
     protected String tokenApp() {
         return null;

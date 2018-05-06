@@ -3,7 +3,10 @@ package unimelb.mf.essentials.plugin.services;
 import java.io.OutputStream;
 import java.util.Collection;
 
-import unimelb.mf.essentials.plugin.download.AssetDownloadShellScriptWriter;
+import arc.mf.plugin.dtype.BooleanType;
+import arc.mf.plugin.dtype.IntegerType;
+import arc.xml.XmlDoc;
+import unimelb.mf.essentials.plugin.script.download.AssetDownloadShellScriptWriter;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCreate {
@@ -14,6 +17,12 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
 
     public SvcAssetDownloadShellScriptCreate() {
         super();
+        this.defn.add(new Interface.Element("page-size", IntegerType.POSITIVE_ONE,
+                "Query page size. Defaults to " + AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE, 0, 1));
+        this.defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,
+                "Whether or not overwrite existing files. Defaults to false", 0, 1));
+        this.defn.add(new Interface.Element("verbose", BooleanType.DEFAULT,
+                "Whether or not display the files being downloaded. Defaults to false", 0, 1));
     }
 
     @Override
@@ -27,9 +36,13 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
     }
 
     @Override
-    protected void generateScript(TargetOS target, ServerDetails serverDetails, String token, String where,
-            Collection<String> namespaces, OutputStream out) throws Throwable {
-        AssetDownloadShellScriptWriter w = AssetDownloadShellScriptWriter.create(target, serverDetails, token, out);
+    protected void generateScript(XmlDoc.Element args, TargetOS target, ServerDetails serverDetails, String token,
+            String where, Collection<String> namespaces, OutputStream out) throws Throwable {
+        int pageSize = args.intValue("page-size", AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE);
+        boolean overwrite = args.booleanValue("overwrite", false);
+        boolean verbose = args.booleanValue("verbose", false);
+        AssetDownloadShellScriptWriter w = AssetDownloadShellScriptWriter.create(target, serverDetails, token, pageSize,
+                overwrite, verbose, out);
         try {
             if (where != null) {
                 w.addQuery(executor(), where);

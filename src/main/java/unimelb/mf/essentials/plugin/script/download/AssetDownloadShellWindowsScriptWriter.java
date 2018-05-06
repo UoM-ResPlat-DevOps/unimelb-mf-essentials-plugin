@@ -1,4 +1,4 @@
-package unimelb.mf.essentials.plugin.download;
+package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 
@@ -7,9 +7,9 @@ import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScriptWriter {
 
-    public AssetDownloadShellWindowsScriptWriter(ServerDetails serverDetails, String token, OutputStream os)
-            throws Throwable {
-        super(serverDetails, token, os, false, LineSeparator.WINDOWS);
+    public AssetDownloadShellWindowsScriptWriter(ServerDetails serverDetails, String token, int pageSize,
+            boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, pageSize, overwrite, verbose, os, false, LineSeparator.WINDOWS);
     }
 
     @Override
