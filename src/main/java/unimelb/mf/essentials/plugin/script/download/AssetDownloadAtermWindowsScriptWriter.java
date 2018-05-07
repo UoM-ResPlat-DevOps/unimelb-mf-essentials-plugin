@@ -42,6 +42,7 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println();
         println("SET MFLUX_ATERM=%~dp0aterm.jar");
         println("IF NOT EXIST \"%MFLUX_ATERM%\" (");
+        println("    ECHO downloading %MFLUX_ATERM%");
         println("    CALL :DOWNLOAD " + atermUrl() + " %MFLUX_ATERM%");
         println(")");
         println("IF NOT EXIST \"%MFLUX_ATERM%\" (");
