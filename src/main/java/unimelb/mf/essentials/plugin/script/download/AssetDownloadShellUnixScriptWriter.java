@@ -19,12 +19,14 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
         /*
          * Is the current script being sourced or executed
          */
-        println();
-        println("if [[ \"${BASH_SOURCE[0]}\" != \"${0}\" ]]; then");
-        println("    SOURCED=true");
-        println("else");
-        println("    SOURCED=false");
-        println("fi");
+        // @formatter:off
+//        println();
+//        println("if [[ \"${BASH_SOURCE[0]}\" != \"${0}\" ]]; then");
+//        println("    SOURCED=true");
+//        println("else");
+//        println("    SOURCED=false");
+//        println("fi");
+        // @formatter:on
 
         /*
          * output directory
@@ -82,9 +84,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
 
     @Override
     public void addAsset(String assetId, String dstPath) {
-        println(String.format(
-                "download %s \"%s\" || exit 2",
-                assetId, dstPath));
+        println(String.format("download %s \"%s\" || exit 2", assetId, dstPath));
     }
 
     @Override

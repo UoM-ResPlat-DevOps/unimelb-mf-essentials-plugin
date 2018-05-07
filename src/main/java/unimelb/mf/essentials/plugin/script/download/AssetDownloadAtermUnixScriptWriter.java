@@ -23,12 +23,14 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
         /*
          * Is the current script being sourced or executed
          */
-        println();
-        println("if [[ \"${BASH_SOURCE[0]}\" != \"${0}\" ]]; then");
-        println("    SOURCED=true");
-        println("else");
-        println("    SOURCED=false");
-        println("fi");
+        // @formatter:off
+//        println();
+//        println("if [[ \"${BASH_SOURCE[0]}\" != \"${0}\" ]]; then");
+//        println("    SOURCED=true");
+//        println("else");
+//        println("    SOURCED=false");
+//        println("fi");
+        // @formatter:on
         
         /*
          * output directory
