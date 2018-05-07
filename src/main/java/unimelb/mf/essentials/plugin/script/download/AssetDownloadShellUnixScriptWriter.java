@@ -55,7 +55,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
         println("        curl --create-dirs -k -o \"${out}\" ${url}");
         println("    else");
         println("        if [[ ! -z $(which wget) ]]; then");
-        println("            wget --force-directories -O \"${out}\" ${url}");
+        println("            wget --no-check-certificate --force-directories -O \"${out}\" ${url}");
         println("        else");
         println("           echo \"Error: no curl or wget is found. Please install curl or wget and retry.\" 1>&2");
         println("           exit 1");
