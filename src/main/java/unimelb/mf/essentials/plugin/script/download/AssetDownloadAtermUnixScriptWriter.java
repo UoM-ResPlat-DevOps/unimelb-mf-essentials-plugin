@@ -100,7 +100,7 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
          */
         println();
         println("export MFLUX_ATERM=\"${DIR}/aterm.jar\"");
-        println(String.format("[[ ! -f \"${MFLUX_ATERM}\" ]] && download %s \"${MFLUX_ATERM}\" || exit 3", atermUrl()));
+        println(String.format("[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"downloading ${MFLUX_ATERM}\" && download %s \"${MFLUX_ATERM}\" || exit 3", atermUrl()));
         println("[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"Error: Failed to download aterm.jar.\" 1>&2 && exit 3");
 
         /*
