@@ -83,7 +83,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
     @Override
     public void addAsset(String assetId, String dstPath) {
         println(String.format(
-                "download %s \"%s\" || ( if [[ \"${SOURCED}\" == \"true\" ]]; then return 2; else exit 2; fi )",
+                "download %s \"%s\" || exit 2",
                 assetId, dstPath));
     }
 
