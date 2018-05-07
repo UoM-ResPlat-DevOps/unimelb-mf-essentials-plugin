@@ -52,7 +52,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
             println("    echo \"downloading file: ${out}\"");
         }
         println("    if [[ ! -z $(which curl) ]]; then");
-        println("        curl --create-dirs -o \"${out}\" ${url}");
+        println("        curl --create-dirs -k -o \"${out}\" ${url}");
         println("    else");
         println("        if [[ ! -z $(which wget) ]]; then");
         println("            wget --force-directories -O \"${out}\" ${url}");
