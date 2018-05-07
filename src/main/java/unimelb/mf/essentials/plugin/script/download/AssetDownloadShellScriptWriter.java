@@ -18,7 +18,7 @@ import unimelb.utils.URIBuilder;
 public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter {
 
     public static final String SERVLET_PATH = "/mflux/content.mfjp";
-    public static final String TOKEN_APP = "servlet:arc.mflux.content";
+    public static final String TOKEN_APP = "content.mfjp"; // "servlet:arc.mflux.content";
     public static final String TOKEN_TAG = "UNIMELB_DOWNLOAD_SHELL_SCRIPT";
     public static final int DEFAULT_PAGE_SIZE = 10000;
 

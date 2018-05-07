@@ -19,6 +19,17 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
 
     protected void writeHead() throws Throwable {
         println("#!/bin/bash");
+        
+        /*
+         * Is the current script being sourced or executed
+         */
+        println();
+        println("if [[ \"${BASH_SOURCE[0]}\" != \"${0}\" ]]; then");
+        println("    SOURCED=true");
+        println("else");
+        println("    SOURCED=false");
+        println("fi");
+        
         /*
          * output directory
          */
@@ -37,16 +48,19 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
         println("    local url=$1");
         println("    local out=$2");
         println("    if [[ ! -z $(which curl) ]]; then");
-        println("        curl --create-dirs -k -o \"${out}\" ${url}");
+        println("        curl --create-dirs -k -o \"${out}\" \"${url}\"");
+        println("        [[ $? -ne 0 ]] && echo \"Error: curl failed to download ${out}\" 1>&2 && return 2");
         println("    else");
         println("        if [[ ! -z $(which wget) ]]; then");
         println("            local pdir=$(dirname \"${out}\")");
-        println("            mkdir -p \"${pdir}\" && wget --quiet --no-check-certificate -O \"${out}\" ${url}");
+        println("            mkdir -p \"${pdir}\" && wget --quiet --no-check-certificate -O \"${out}\" \"${url}\"");
+        println("            [[ $? -ne 0 ]] && echo \"Error: wget failed to download ${out}\" 1>&2 && return 2");
         println("        else");
         println("           echo \"Error: no curl or wget is found. Please install curl or wget and retry.\" 1>&2");
-        println("           exit 2");
+        println("           return 1");
         println("        fi");
         println("    fi");
+        println("    return 0");
         println("}");
 
         /*
@@ -84,7 +98,7 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
          */
         println();
         println("export MFLUX_ATERM=\"${DIR}/aterm.jar\"");
-        println(String.format("[[ ! -f \"${MFLUX_ATERM}\" ]] && download %s \"${MFLUX_ATERM}\"", atermUrl()));
+        println(String.format("[[ ! -f \"${MFLUX_ATERM}\" ]] && download %s \"${MFLUX_ATERM}\" || exit 3", atermUrl()));
         println("[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"Error: Failed to download aterm.jar.\" 1>&2 && exit 3");
 
         /*

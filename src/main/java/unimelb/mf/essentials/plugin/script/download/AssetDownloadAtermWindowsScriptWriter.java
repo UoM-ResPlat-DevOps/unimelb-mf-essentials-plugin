@@ -64,11 +64,17 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
 
     protected void writeTail() {
         /*
-         * 
+         * clean up 
          */
         println();
         println("DEL \"%MFLUX_CFG%\"");
         println("DEL \"%MFLUX_ATERM%\"");
+        
+        /*
+         * exit 0
+         */
+        println();
+        println("EXIT /B 0");
 
         /*
          * download function
@@ -77,15 +83,15 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println(":DOWNLOAD");
         println("SETLOCAL EnableExtensions EnableDelayedExpansion");
         println("SET url=%~1");
-        println("SET out=\"%~2\"");
-        println("FOR %%F IN (%out%) DO SET pdir=%%~dpF");
+        println("SET out=%~2");
+        println("FOR %%F IN (\"%out%\") DO SET \"pdir=%%~dpF\"");
         println("WHERE POWERSHELL >NUL 2>NUL");
         println("IF %ERRORLEVEL% EQU 0 (");
         println("    MD \"%pdir%\" 2>NUL");
-        println("    POWERSHELL -COMMAND \"(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
+        println("    POWERSHELL -COMMAND \"[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
         println(")");
         // @formatter:off
-//        println("IF NOT EXIST \"%out%\" (");
+//        println("IF %ERRORLEVEL% NEQ 0 (");
 //        println("    WHERE BITSADMIN >NUL 2>NUL");
 //        println("    IF %ERRORLEVEL% EQU 0 (");
 //        println("        MD \"%pdir%\" 2>NUL");
@@ -93,7 +99,8 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
 //        println("    )");
 //        println(")");
         // @formatter:on
-        println("IF NOT EXIST \"%out%\" (");
+        println("IF %ERRORLEVEL% NEQ 0 (");
+        println("    ECHO failed to download %out%");
         println("    EXIT /B 1");
         println(")");
         println("EXIT /B 0");

@@ -31,6 +31,15 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
 
     @Override
     protected void writeTail() {
+        /*
+         * exit 0
+         */
+        println();
+        println("EXIT /B 0");
+        
+        /*
+         * download function
+         */
         println();
         println(":DOWNLOAD");
         println("SETLOCAL EnableExtensions EnableDelayedExpansion");
@@ -45,16 +54,16 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
             println(")");
         }
         if (verbose()) {
-            println("    ECHO downloading %out%");
+            println("ECHO downloading %out%");
         }
-        println("FOR %%F IN (%out%) DO SET pdir=%%~dpF");
+        println("FOR %%F IN (\"%out%\") DO SET \"pdir=%%~dpF\"");
         println("WHERE POWERSHELL >NUL 2>NUL");
         println("IF %ERRORLEVEL% EQU 0 (");
         println("    MD \"%pdir%\" 2>NUL");
-        println("    POWERSHELL -COMMAND \"(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
+        println("    POWERSHELL -COMMAND \"[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true};(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
         println(")");
         // @formatter:off
-//        println("IF NOT EXIST \"%out%\" (");
+//        println("IF %ERRORLEVEL% NEQ 0 (");
 //        println("    WHERE BITSADMIN >NUL 2>NUL");
 //        println("    IF %ERRORLEVEL% EQU 0 (");
 //        println("        MD \"%pdir%\" 2>NUL");
@@ -62,7 +71,8 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
 //        println("    )");
 //        println(")");
         // @formatter:on
-        println("IF NOT EXIST \"%out%\" (");
+        println("IF %ERRORLEVEL% NEQ 0 (");
+        println("    ECHO failed to download %out%");
         println("    EXIT /B 1");
         println(")");
         println("EXIT /B 0");
@@ -71,7 +81,7 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
 
     @Override
     public void addAsset(String assetId, String dstPath) {
-        println(String.format("CALL :DOWNLOAD %s \"%s\"", assetId, dstPath));
+        println(String.format("CALL :DOWNLOAD %s \"%s\" || EXIT /B 1", assetId, dstPath));
     }
 
     @Override
