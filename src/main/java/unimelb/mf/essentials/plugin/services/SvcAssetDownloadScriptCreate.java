@@ -71,19 +71,23 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
 
     protected SvcAssetDownloadScriptCreate() {
         this.defn = new Interface();
+        SvcAssetDownloadScriptCreate.addToDefn(this.defn);
+    }
 
-        this.defn.add(new Interface.Element("name", StringType.DEFAULT, "The output script file name.", 0, 1));
+    static void addToDefn(Interface defn) {
+        
+        defn.add(new Interface.Element("name", StringType.DEFAULT, "The output script file name.", 0, 1));
 
-        this.defn.add(new Interface.Element("where", StringType.DEFAULT, "The query to select the assets to download.",
-                0, 1));
+        defn.add(new Interface.Element("where", StringType.DEFAULT, "The query to select the assets to download.", 0,
+                1));
 
-        this.defn.add(new Interface.Element("namespace", StringType.DEFAULT, "The asset namespace to download.", 0,
+        defn.add(new Interface.Element("namespace", StringType.DEFAULT, "The asset namespace to download.", 0,
                 Integer.MAX_VALUE));
 
         /*
          * target os
          */
-        this.defn.add(new Interface.Element("target", new EnumType(TargetOS.values()),
+        defn.add(new Interface.Element("target", new EnumType(TargetOS.values()),
                 "The target operating system. If not specified, the scripts for both windows and unix are generated.",
                 0, 1));
 
@@ -99,7 +103,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
 
         server.add(new Interface.Element("transport", new EnumType(new String[] { "http", "https" }),
                 "server transport: http or https?", 0, 1));
-        this.defn.add(server);
+        defn.add(server);
 
         /*
          * token
@@ -111,7 +115,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
                 "A time, after which the token is no longer valid. If not supplied token will not expire.", 1, 1));
         token.add(new Interface.Element("use-count", IntegerType.POSITIVE_ONE,
                 "The number of times the token may be used.", 0, 1));
-        this.defn.add(token);
+        defn.add(token);
     }
 
     @Override

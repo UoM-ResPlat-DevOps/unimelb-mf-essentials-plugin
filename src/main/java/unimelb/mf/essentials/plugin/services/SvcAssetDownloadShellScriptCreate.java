@@ -17,11 +17,15 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
 
     public SvcAssetDownloadShellScriptCreate() {
         super();
-        this.defn.add(new Interface.Element("page-size", IntegerType.POSITIVE_ONE,
+        SvcAssetDownloadShellScriptCreate.addToDefn(this.defn);
+    }
+
+    static void addToDefn(Interface defn) {
+        defn.add(new Interface.Element("page-size", IntegerType.POSITIVE_ONE,
                 "Query page size. Defaults to " + AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE, 0, 1));
-        this.defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,
+        defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,
                 "Whether or not overwrite existing files. Defaults to false", 0, 1));
-        this.defn.add(new Interface.Element("verbose", BooleanType.DEFAULT,
+        defn.add(new Interface.Element("verbose", BooleanType.DEFAULT,
                 "Whether or not display the files being downloaded. Defaults to false", 0, 1));
     }
 
