@@ -84,13 +84,15 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println("    MD \"%pdir%\" 2>NUL");
         println("    POWERSHELL -COMMAND \"(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
         println(")");
-        println("IF NOT EXIST \"%out%\" (");
-        println("    WHERE BITSADMIN >NUL 2>NUL");
-        println("    IF %ERRORLEVEL% EQU 0 (");
-        println("        MD \"%pdir%\" 2>NUL");
-        println("        BITSADMIN /TRANSFER \"Download %out%\" %url% \"%out%\" >NUL 2>NUL");
-        println("    )");
-        println(")");
+        // @formatter:off
+//        println("IF NOT EXIST \"%out%\" (");
+//        println("    WHERE BITSADMIN >NUL 2>NUL");
+//        println("    IF %ERRORLEVEL% EQU 0 (");
+//        println("        MD \"%pdir%\" 2>NUL");
+//        println("        BITSADMIN /TRANSFER \"Download %out%\" %url% \"%out%\" >NUL 2>NUL");
+//        println("    )");
+//        println(")");
+        // @formatter:on
         println("IF NOT EXIST \"%out%\" (");
         println("    EXIT /B 1");
         println(")");
@@ -103,7 +105,8 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println(":DOWNLOAD_NAMESPACE");
         println("SETLOCAL EnableExtensions EnableDelayedExpansion");
         println("SET namespace=%~1");
-        println("java -jar -Dmf.cfg=\"%MFLUX_CFG%\" \"%MFLUX_ATERM%\" nogui download -filename-collisions skip -ncsr "
+        println("java -jar -Dmf.cfg=\"%MFLUX_CFG%\" \"%MFLUX_ATERM%\" nogui download -verbose " + verbose()
+                + " -filename-collisions " + (overwrite() ? "overwrite" : "skip") + " -ncsr "
                 + numberOfConcurrentServerRequests() + " -namespace \"%namespace%\" \"%DIR%\"");
         println("EXIT /B 0");
         // download where
@@ -111,7 +114,8 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
         println(":DOWNLOAD_WHERE");
         println("SETLOCAL EnableExtensions EnableDelayedExpansion");
         println("SET where=%~1");
-        println("java -jar -Dmf.cfg=\"%MFLUX_CFG%\" \"%MFLUX_ATERM%\" nogui download -filename-collisions skip -ncsr "
+        println("java -jar -Dmf.cfg=\"%MFLUX_CFG%\" \"%MFLUX_ATERM%\" nogui download -verbose " + verbose()
+                + " -filename-collisions " + (overwrite() ? "overwrite" : "skip") + " -ncsr "
                 + numberOfConcurrentServerRequests() + " -where \"%where%\" \"%DIR%\"");
         println("EXIT /B 0");
 

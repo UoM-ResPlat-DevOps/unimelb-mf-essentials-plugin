@@ -38,13 +38,13 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
         println("SET dst=%~2");
         println("SET url=%URI%^&id=%id%");
         println("SET out=%DIR%\\%dst%");
-        if(!overwrite()) {
+        if (!overwrite()) {
             println("IF EXIST \"%out%\" (");
             println("    ECHO %out% already exists. Skipped.");
             println("    EXIT /B 0");
             println(")");
         }
-        if(verbose()) {
+        if (verbose()) {
             println("    ECHO downloading %out%");
         }
         println("FOR %%F IN (%out%) DO SET pdir=%%~dpF");
@@ -53,13 +53,15 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
         println("    MD \"%pdir%\" 2>NUL");
         println("    POWERSHELL -COMMAND \"(New-Object Net.WebClient).DownloadFile('%url%', '%out%')\" >NUL 2>NUL");
         println(")");
-        println("IF NOT EXIST \"%out%\" (");
-        println("    WHERE BITSADMIN >NUL 2>NUL");
-        println("    IF %ERRORLEVEL% EQU 0 (");
-        println("        MD \"%pdir%\" 2>NUL");
-        println("        BITSADMIN /TRANSFER \"Download %out%\" %url% \"%out%\" >NUL 2>NUL");
-        println("    )");
-        println(")");
+        // @formatter:off
+//        println("IF NOT EXIST \"%out%\" (");
+//        println("    WHERE BITSADMIN >NUL 2>NUL");
+//        println("    IF %ERRORLEVEL% EQU 0 (");
+//        println("        MD \"%pdir%\" 2>NUL");
+//        println("        BITSADMIN /TRANSFER \"Download %out%\" %url% \"%out%\" >NUL 2>NUL");
+//        println("    )");
+//        println(")");
+        // @formatter:on
         println("IF NOT EXIST \"%out%\" (");
         println("    EXIT /B 1");
         println(")");
