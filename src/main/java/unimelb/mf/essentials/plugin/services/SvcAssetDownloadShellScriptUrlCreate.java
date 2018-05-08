@@ -1,39 +1,35 @@
 package unimelb.mf.essentials.plugin.services;
 
-import arc.mf.plugin.PluginService;
-import arc.xml.XmlDoc.Element;
-import arc.xml.XmlWriter;
+public class SvcAssetDownloadShellScriptUrlCreate extends SvcAssetDownloadScriptUrlCreate {
 
-public class SvcAssetDownloadShellScriptUrlCreate extends PluginService {
+    public static final String SERVICE_NAME = "unimelb.asset.download.shell.script.url.create";
 
-    @Override
-    public Access access() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    public static final String TOKEN_TAG = "UNIMELB_ASSET_DOWNLOAD_SHELL_SCRIPT_URL";
 
-    @Override
-    public Interface definition() {
-        // TODO Auto-generated method stub
-        return null;
+    public static final String FILENAME_PREFIX = "unimelb-asset-download-shell-script";
+
+    public SvcAssetDownloadShellScriptUrlCreate() {
+        super();
+        SvcAssetDownloadAtermScriptCreate.addToDefn(this.defn);
     }
 
     @Override
     public String description() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void execute(Element arg0, Inputs arg1, Outputs arg2, XmlWriter arg3) throws Throwable {
-        // TODO Auto-generated method stub
-        
+        return "Generate download link for the shell scripts.";
     }
 
     @Override
     public String name() {
-        // TODO Auto-generated method stub
-        return null;
+        return SERVICE_NAME;
     }
 
+    @Override
+    protected String tokenTag() {
+        return TOKEN_TAG;
+    }
+
+    @Override
+    protected String filenamePrefix() {
+        return FILENAME_PREFIX;
+    }
 }

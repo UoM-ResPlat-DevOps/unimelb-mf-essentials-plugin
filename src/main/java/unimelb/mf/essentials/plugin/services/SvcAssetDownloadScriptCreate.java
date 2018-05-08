@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Collection;
+import java.util.List;
 
 import arc.archive.ArchiveOutput;
 import arc.archive.ArchiveRegistry;
@@ -75,7 +76,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
     }
 
     static void addToDefn(Interface defn) {
-        
+
         defn.add(new Interface.Element("name", StringType.DEFAULT, "The output script file name.", 0, 1));
 
         defn.add(new Interface.Element("where", StringType.DEFAULT, "The query to select the assets to download.", 0,
@@ -109,6 +110,10 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
          * token
          */
         Interface.Element token = new Interface.Element("token", XmlDocType.DEFAULT, "Token specification.", 1, 1);
+        Interface.Element tokenRole = new Interface.Element("role", new StringType(128),
+                "Role (name) to grant. If not specified, defaults to the calling user.", 0, Integer.MAX_VALUE);
+        tokenRole.add(new Interface.Attribute("type", new StringType(64), "Role type.", 1));
+        token.add(tokenRole);
         token.add(new Interface.Element("from", DateType.DEFAULT,
                 "A time, before which the token is not valid. If not supplied token is valid immediately.", 0, 1));
         token.add(new Interface.Element("to", DateType.DEFAULT,
@@ -211,15 +216,32 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         if (te != null && te.elementExists("use-count")) {
             dm.add(te.element("use-count"));
         }
-        dm.add("role", new String[] { "type", "role" }, "user");
-        dm.add("role", new String[] { "type", "user" }, executor.execute("actor.self.describe").value("actor/@name"));
+        if (te != null && te.elementExists("role")) {
+            boolean hasUserRole = false;
+            List<XmlDoc.Element> res = te.elements("role");
+            for (XmlDoc.Element re : res) {
+                String type = re.value("@type");
+                String role = re.value();
+                if ("role".equalsIgnoreCase(type) && "user".equalsIgnoreCase(role)) {
+                    hasUserRole = true;
+                }
+                dm.add(re);
+            }
+            if (!hasUserRole) {
+                dm.add("role", new String[] { "type", "role" }, "user");
+            }
+        } else {
+            dm.add("role", new String[] { "type", "role" }, "user");
+            dm.add("role", new String[] { "type", "user" },
+                    executor.execute("actor.self.describe").value("actor/@name"));
+        }
         if (tokenTag != null) {
             dm.add("tag", tokenTag);
         }
         return executor.execute("secure.identity.token.create", dm.root()).value("token");
     }
 
-    private static ServerDetails resolveServerDetails(ServiceExecutor executor, Element se) throws Throwable {
+    static ServerDetails resolveServerDetails(ServiceExecutor executor, Element se) throws Throwable {
         ServerDetails sd = ServerDetails.resolve(executor);
         if (se == null) {
             return sd;
