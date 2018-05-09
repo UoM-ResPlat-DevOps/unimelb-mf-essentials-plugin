@@ -96,7 +96,7 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     protected abstract String scriptCreateServiceName();
 
     private void sendEmail(ServiceExecutor executor, String url, Date expiry, XmlDoc.Element ee) throws Throwable {
-        boolean bccSelf = ee.booleanValue("bcc-self", true);
+        boolean bccSelf = ee.booleanValue("@bcc-self", true);
         XmlDocMaker dm = new XmlDocMaker("args");
         dm.add("async", true);
         dm.addAll(ee.elements("to"));
