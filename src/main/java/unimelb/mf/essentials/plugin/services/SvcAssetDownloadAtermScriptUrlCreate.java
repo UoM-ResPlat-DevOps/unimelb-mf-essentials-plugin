@@ -32,4 +32,9 @@ public class SvcAssetDownloadAtermScriptUrlCreate extends SvcAssetDownloadScript
     protected String filenamePrefix() {
         return FILENAME_PREFIX;
     }
+
+    @Override
+    protected String scriptCreateServiceName() {
+        return SvcAssetDownloadAtermScriptCreate.SERVICE_NAME;
+    }
 }

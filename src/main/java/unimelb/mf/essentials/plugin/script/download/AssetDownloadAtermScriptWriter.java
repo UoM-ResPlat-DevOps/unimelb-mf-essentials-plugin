@@ -12,7 +12,7 @@ import unimelb.utils.URIBuilder;
 
 public abstract class AssetDownloadAtermScriptWriter extends ClientScriptWriter {
 
-    public static final String TOKEN_APP = "ATERM";
+    public static final String TOKEN_APP = "aterm";
 
     public static final String TOKEN_TAG = "UNIMELB_DOWNLOAD_ATERM_SCRIPT";
 

@@ -32,7 +32,7 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
          * servlet url
          */
         println();
-        println("SET URI=" + servletURI());
+        println("SET \"URI=" + servletURI()+"\"");
         flush();
     }
 

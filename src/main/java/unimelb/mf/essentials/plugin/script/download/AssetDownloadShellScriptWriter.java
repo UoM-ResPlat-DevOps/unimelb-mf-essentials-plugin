@@ -30,7 +30,8 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
     protected AssetDownloadShellScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry, int pageSize,
             boolean overwrite, boolean verbose, OutputStream os, boolean autoFlush, LineSeparator lineSeparator)
             throws Throwable {
-        super(serverDetails, token, TOKEN_APP, tokenExpiry,
+        // TODO tokenapp
+        super(serverDetails, token, null /* TOKEN_APP */, tokenExpiry,
                 MapUtils.createMap(new String[] { ARG_PAGE_SIZE, ARG_OVERWRITE, ARG_VERBOSE },
                         new Object[] { pageSize < 1 ? DEFAULT_PAGE_SIZE : pageSize, overwrite, verbose }),
                 os, autoFlush, lineSeparator);
@@ -71,6 +72,9 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
                 .setPort(server().port()).setPath(servletPath());
         if (token() != null) {
             ub.addParam("_token", token());
+        }
+        if (tokenApp() != null) {
+            ub.addParam("_tokenapp", tokenApp());
         }
         return ub.build();
     }
@@ -123,11 +127,13 @@ public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter 
         }
     }
 
-    public static AssetDownloadShellScriptWriter create(TargetOS target, ServerDetails serverDetails, String token, Date tokenExpiry,
-            int pageSize, boolean overwrite, boolean verbose, OutputStream out) throws Throwable {
+    public static AssetDownloadShellScriptWriter create(TargetOS target, ServerDetails serverDetails, String token,
+            Date tokenExpiry, int pageSize, boolean overwrite, boolean verbose, OutputStream out) throws Throwable {
         return target == TargetOS.UNIX
-                ? new AssetDownloadShellUnixScriptWriter(serverDetails, token, tokenExpiry, pageSize, overwrite, verbose, out)
-                : new AssetDownloadShellWindowsScriptWriter(serverDetails, token, tokenExpiry, pageSize, overwrite, verbose, out);
+                ? new AssetDownloadShellUnixScriptWriter(serverDetails, token, tokenExpiry, pageSize, overwrite,
+                        verbose, out)
+                : new AssetDownloadShellWindowsScriptWriter(serverDetails, token, tokenExpiry, pageSize, overwrite,
+                        verbose, out);
     }
 
 }

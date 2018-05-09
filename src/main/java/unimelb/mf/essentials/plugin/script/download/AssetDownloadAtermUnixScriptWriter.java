@@ -56,7 +56,7 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
         println("    local url=$1");
         println("    local out=$2");
         println("    if [[ ! -z $(which curl) ]]; then");
-        println("        curl --create-dirs -k -o \"${out}\" \"${url}\"");
+        println("        curl -f --create-dirs -k -o \"${out}\" \"${url}\"");
         println("        [[ $? -ne 0 ]] && echo \"Error: curl failed to download ${out}\" 1>&2 && return 2");
         println("    else");
         println("        if [[ ! -z $(which wget) ]]; then");

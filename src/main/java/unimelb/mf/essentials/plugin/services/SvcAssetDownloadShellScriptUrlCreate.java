@@ -10,7 +10,7 @@ public class SvcAssetDownloadShellScriptUrlCreate extends SvcAssetDownloadScript
 
     public SvcAssetDownloadShellScriptUrlCreate() {
         super();
-        SvcAssetDownloadAtermScriptCreate.addToDefn(this.defn);
+        SvcAssetDownloadShellScriptCreate.addToDefn(this.defn);
     }
 
     @Override
@@ -31,5 +31,10 @@ public class SvcAssetDownloadShellScriptUrlCreate extends SvcAssetDownloadScript
     @Override
     protected String filenamePrefix() {
         return FILENAME_PREFIX;
+    }
+
+    @Override
+    protected String scriptCreateServiceName() {
+        return SvcAssetDownloadShellScriptCreate.SERVICE_NAME;
     }
 }

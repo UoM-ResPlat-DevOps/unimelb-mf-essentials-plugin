@@ -19,9 +19,9 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
         println("#!/bin/bash");
 
         if (tokenExpiry() != null) {
-            println("echo \"Mediaflux auth token expiry: " + DateTime.string(tokenExpiry())+"\"");
+            println("echo \"Mediaflux auth token expiry: " + DateTime.string(tokenExpiry()) + "\"");
         }
-        
+
         /*
          * Is the current script being sourced or executed
          */
@@ -48,7 +48,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
          * servlt url
          */
         println();
-        println("URI=" + servletURI());
+        println("URI=\"" + servletURI() + "\"");
 
         /*
          * download function
@@ -70,7 +70,7 @@ public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScript
             println("    echo \"downloading file: ${out}\"");
         }
         println("    if [[ ! -z $(which curl) ]]; then");
-        println("        curl --create-dirs -k -o \"${out}\" \"${url}\"");
+        println("        curl -f --create-dirs -k -o \"${out}\" \"${url}\"");
         println("        [[ $? -ne 0 ]] && echo \"Error: curl failed to download ${out}\" 1>&2 && return 2");
         println("    else");
         println("        if [[ ! -z $(which wget) ]]; then");

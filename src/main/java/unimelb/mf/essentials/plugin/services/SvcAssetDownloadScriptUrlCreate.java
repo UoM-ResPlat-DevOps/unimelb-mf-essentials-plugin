@@ -87,6 +87,8 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     protected abstract String tokenTag();
 
     protected abstract String filenamePrefix();
+    
+    protected abstract String scriptCreateServiceName();
 
     private void sendEmail(ServiceExecutor executor, String url, Date expiry, XmlDoc.Element ee) throws Throwable {
         XmlDocMaker dm = new XmlDocMaker("args");
@@ -179,7 +181,7 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         dm.add("min-token-length", 20);
         dm.add("max-token-length", 20);
         dm.add("tag", tokenTag());
-        dm.push("service", new String[] { "name", SvcAssetDownloadAtermScriptCreate.SERVICE_NAME });
+        dm.push("service", new String[] { "name", scriptCreateServiceName() });
         List<XmlDoc.Element> ees = args.elements();
         if (ees != null) {
             for (XmlDoc.Element ee : ees) {

@@ -68,7 +68,9 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
 
     @Override
     protected final String tokenApp() {
-        return AssetDownloadShellScriptWriter.TOKEN_APP;
+        // TODO
+        // return AssetDownloadShellScriptWriter.TOKEN_APP;
+        return null;
     }
 
     @Override

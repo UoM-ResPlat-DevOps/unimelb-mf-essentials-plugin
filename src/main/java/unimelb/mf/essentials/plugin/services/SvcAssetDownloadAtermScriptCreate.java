@@ -69,6 +69,7 @@ public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCre
     @Override
     protected String tokenApp() {
         // TODO
+        // return AssetDownloadAtermScriptWriter.TOKEN_APP;
         return null;
     }
 
