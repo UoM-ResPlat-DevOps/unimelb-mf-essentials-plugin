@@ -133,8 +133,38 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         return this.defn;
     }
 
+    static void validateArgs(ServiceExecutor executor, XmlDoc.Element args) throws Throwable {
+        Collection<String> roles = args.values("token/role[@type='role']");
+        if (roles != null && !roles.isEmpty()) {
+            for (String role : roles) {
+                boolean roleExists = executor
+                        .execute("authorization.role.exists", "<args><role>" + role + "</role></args>", null, null)
+                        .booleanValue("exists");
+                if (!roleExists) {
+                    throw new IllegalArgumentException("Role: " + role + " does not exist");
+                }
+            }
+        }
+        Collection<String> namespaces = args.values("namespace");
+        if (namespaces != null && !namespaces.isEmpty()) {
+            for (String namespace : namespaces) {
+                boolean namespaceExists = executor.execute("asset.namespace.exists ",
+                        "<args><namespace>" + namespace + "</namespace></args>", null, null).booleanValue("exists");
+                if (!namespaceExists) {
+                    throw new IllegalArgumentException("Asset namespace: " + namespace + " does not exist");
+                }
+            }
+        }
+    }
+
     @Override
     public void execute(final Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
+
+        /*
+         * check if specified namespaces and roles exist
+         */
+        validateArgs(executor(), args);
+
         final String where = args.value("where");
         final Collection<String> namespaces = args.values("namespace");
         if (where == null && (namespaces == null || namespaces.isEmpty())) {

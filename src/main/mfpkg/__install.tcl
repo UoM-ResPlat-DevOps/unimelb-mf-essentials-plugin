@@ -29,3 +29,5 @@ system.service.reload
 # refresh the enclosing shell
 srefresh
 
+# apply required permissions
+source permissions.tcl

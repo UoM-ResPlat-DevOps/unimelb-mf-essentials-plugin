@@ -65,6 +65,12 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
 
     @Override
     public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
+        
+        /*
+         * check if specified namespaces and roles exist
+         */
+        SvcAssetDownloadScriptCreate.validateArgs(executor(), args);
+        
         String token = createToken(executor(), args);
         if (token != null) {
             String url = null;
