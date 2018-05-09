@@ -137,7 +137,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         Collection<String> namespaces = args.values("namespace");
         if (namespaces != null && !namespaces.isEmpty()) {
             for (String namespace : namespaces) {
-                boolean namespaceExists = executor.execute("asset.namespace.exists ",
+                boolean namespaceExists = executor.execute("asset.namespace.exists",
                         "<args><namespace>" + namespace + "</namespace></args>", null, null).booleanValue("exists");
                 if (!namespaceExists) {
                     throw new IllegalArgumentException("Asset namespace: " + namespace + " does not exist");
