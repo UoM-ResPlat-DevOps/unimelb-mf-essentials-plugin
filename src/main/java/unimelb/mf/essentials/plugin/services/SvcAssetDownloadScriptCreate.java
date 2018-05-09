@@ -232,8 +232,8 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
             }
         } else {
             dm.add("role", new String[] { "type", "role" }, "user");
-            dm.add("role", new String[] { "type", "user" },
-                    executor.execute("actor.self.describe").value("actor/@name"));
+            XmlDoc.Element ae = executor.execute("actor.self.describe").element("actor");
+            dm.add("role", new String[] { "type", ae.value("@type") }, ae.value("@name"));
         }
         if (tokenTag != null) {
             dm.add("tag", tokenTag);

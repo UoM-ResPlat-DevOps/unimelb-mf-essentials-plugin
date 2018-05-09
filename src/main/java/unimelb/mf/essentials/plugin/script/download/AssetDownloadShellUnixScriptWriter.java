@@ -1,21 +1,27 @@
 package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
+import java.util.Date;
 
+import arc.utils.DateTime;
 import unimelb.mf.essentials.plugin.script.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadShellUnixScriptWriter extends AssetDownloadShellScriptWriter {
 
-    public AssetDownloadShellUnixScriptWriter(ServerDetails serverDetails, String token, int pageSize,
+    public AssetDownloadShellUnixScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry, int pageSize,
             boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
-        super(serverDetails, token, pageSize, overwrite, verbose, os, false, LineSeparator.UNIX);
+        super(serverDetails, token, tokenExpiry, pageSize, overwrite, verbose, os, false, LineSeparator.UNIX);
     }
 
     @Override
     protected void writeHead() throws Throwable {
         println("#!/bin/bash");
 
+        if (tokenExpiry() != null) {
+            println("echo \"Mediaflux auth token expiry: " + DateTime.string(tokenExpiry())+"\"");
+        }
+        
         /*
          * Is the current script being sourced or executed
          */

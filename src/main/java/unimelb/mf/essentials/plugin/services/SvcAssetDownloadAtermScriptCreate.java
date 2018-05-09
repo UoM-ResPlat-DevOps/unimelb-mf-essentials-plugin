@@ -2,6 +2,7 @@ package unimelb.mf.essentials.plugin.services;
 
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Date;
 
 import arc.mf.plugin.dtype.BooleanType;
 import arc.mf.plugin.dtype.IntegerType;
@@ -45,8 +46,9 @@ public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCre
         int ncsr = args.intValue("ncsr", 1);
         boolean overwrite = args.booleanValue("overwrite", false);
         boolean verbose = args.booleanValue("verbose", false);
-        AssetDownloadAtermScriptWriter w = AssetDownloadAtermScriptWriter.create(target, serverDetails, token, ncsr,
-                overwrite, verbose, out);
+        Date tokenExpiry = args.dateValue("token/to", null);
+        AssetDownloadAtermScriptWriter w = AssetDownloadAtermScriptWriter.create(target, serverDetails, token,
+                tokenExpiry, ncsr, overwrite, verbose, out);
         try {
             if (where != null) {
                 w.addQuery(where);

@@ -1,15 +1,17 @@
 package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
+import java.util.Date;
 
+import arc.utils.DateTime;
 import unimelb.mf.essentials.plugin.script.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScriptWriter {
 
-    public AssetDownloadAtermUnixScriptWriter(ServerDetails serverDetails, String token, int ncsr, boolean overwrite,
-            boolean verbose, OutputStream os) throws Throwable {
-        super(serverDetails, token, ncsr, overwrite, verbose, os, false, LineSeparator.UNIX);
+    public AssetDownloadAtermUnixScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry, int ncsr,
+            boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, tokenExpiry, ncsr, overwrite, verbose, os, false, LineSeparator.UNIX);
     }
 
     @Override
@@ -19,7 +21,11 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
 
     protected void writeHead() throws Throwable {
         println("#!/bin/bash");
-        
+
+        if (tokenExpiry() != null) {
+            println("echo \"Mediaflux auth token expiry: " + DateTime.string(tokenExpiry())+"\"");
+        }
+
         /*
          * Is the current script being sourced or executed
          */
@@ -31,7 +37,7 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
 //        println("    SOURCED=false");
 //        println("fi");
         // @formatter:on
-        
+
         /*
          * output directory
          */
@@ -100,7 +106,9 @@ public class AssetDownloadAtermUnixScriptWriter extends AssetDownloadAtermScript
          */
         println();
         println("export MFLUX_ATERM=\"${DIR}/aterm.jar\"");
-        println(String.format("[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"downloading ${MFLUX_ATERM}\" && download %s \"${MFLUX_ATERM}\" || exit 3", atermUrl()));
+        println(String.format(
+                "[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"downloading ${MFLUX_ATERM}\" && download %s \"${MFLUX_ATERM}\" || exit 3",
+                atermUrl()));
         println("[[ ! -f \"${MFLUX_ATERM}\" ]] && echo \"Error: Failed to download aterm.jar.\" 1>&2 && exit 3");
 
         /*

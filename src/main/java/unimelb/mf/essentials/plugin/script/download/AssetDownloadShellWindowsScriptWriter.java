@@ -1,20 +1,27 @@
 package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
+import java.util.Date;
 
+import arc.utils.DateTime;
 import unimelb.mf.essentials.plugin.script.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScriptWriter {
 
-    public AssetDownloadShellWindowsScriptWriter(ServerDetails serverDetails, String token, int pageSize,
-            boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
-        super(serverDetails, token, pageSize, overwrite, verbose, os, false, LineSeparator.WINDOWS);
+    public AssetDownloadShellWindowsScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry,
+            int pageSize, boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, tokenExpiry, pageSize, overwrite, verbose, os, false, LineSeparator.WINDOWS);
     }
 
     @Override
     protected void writeHead() throws Throwable {
         println("@ECHO OFF");
+        
+        if (tokenExpiry() != null) {
+            println("ECHO Mediaflux auth token expiry: " + DateTime.string(tokenExpiry()));
+        }
+        
         /*
          * output directory
          */
@@ -36,7 +43,7 @@ public class AssetDownloadShellWindowsScriptWriter extends AssetDownloadShellScr
          */
         println();
         println("EXIT /B 0");
-        
+
         /*
          * download function
          */

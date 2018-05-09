@@ -2,6 +2,7 @@ package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Date;
 
 import unimelb.mf.essentials.plugin.script.ClientScriptWriter;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadScriptCreate.TargetOS;
@@ -23,10 +24,13 @@ public abstract class AssetDownloadAtermScriptWriter extends ClientScriptWriter 
     public static final String ARG_OVERWRITE = "overwrite";
     public static final String ARG_VERBOSE = "verbose";
 
-    protected AssetDownloadAtermScriptWriter(ServerDetails serverDetails, String token, int ncsr, boolean overwrite,
-            boolean verbose, OutputStream os, boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
-        super(serverDetails, token, TOKEN_APP, MapUtils.createMap(new String[] { ARG_NCSR, ARG_OVERWRITE, ARG_VERBOSE },
-                new Object[] { ncsr, overwrite, verbose }), os, autoFlush, lineSeparator);
+    protected AssetDownloadAtermScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry, int ncsr,
+            boolean overwrite, boolean verbose, OutputStream os, boolean autoFlush, LineSeparator lineSeparator)
+            throws Throwable {
+        super(serverDetails, token, TOKEN_APP, tokenExpiry,
+                MapUtils.createMap(new String[] { ARG_NCSR, ARG_OVERWRITE, ARG_VERBOSE },
+                        new Object[] { ncsr, overwrite, verbose }),
+                os, autoFlush, lineSeparator);
     }
 
     public String atermUrl() throws Throwable {
@@ -74,10 +78,12 @@ public abstract class AssetDownloadAtermScriptWriter extends ClientScriptWriter 
     public abstract void addQuery(String where);
 
     public static AssetDownloadAtermScriptWriter create(TargetOS target, ServerDetails serverDetails, String token,
-            int ncsr, boolean overwrite, boolean verbose, OutputStream out) throws Throwable {
+            Date tokenExpiry, int ncsr, boolean overwrite, boolean verbose, OutputStream out) throws Throwable {
         return target == TargetOS.UNIX
-                ? new AssetDownloadAtermUnixScriptWriter(serverDetails, token, ncsr, overwrite, verbose, out)
-                : new AssetDownloadAtermWindowsScriptWriter(serverDetails, token, ncsr, overwrite, verbose, out);
+                ? new AssetDownloadAtermUnixScriptWriter(serverDetails, token, tokenExpiry, ncsr, overwrite, verbose,
+                        out)
+                : new AssetDownloadAtermWindowsScriptWriter(serverDetails, token, tokenExpiry, ncsr, overwrite, verbose,
+                        out);
     }
 
 }

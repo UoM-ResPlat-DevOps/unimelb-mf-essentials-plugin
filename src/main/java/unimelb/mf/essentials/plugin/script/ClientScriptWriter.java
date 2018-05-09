@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public abstract class ClientScriptWriter extends PrintWriter {
 
     private String _token;
     private String _tokenApp;
+    private Date _tokenExpiry;
 
     private LineSeparator _lineSeparator = null;
     private boolean _autoFlush;
@@ -36,12 +38,14 @@ public abstract class ClientScriptWriter extends PrintWriter {
 
     private Map<String, Object> _args;
 
-    protected ClientScriptWriter(ServerDetails serverDetails, String token, String tokenApp, Map<String, Object> args,
-            OutputStream os, boolean autoFlush, LineSeparator lineSeparator) throws Throwable {
+    protected ClientScriptWriter(ServerDetails serverDetails, String token, String tokenApp, Date tokenExpiry,
+            Map<String, Object> args, OutputStream os, boolean autoFlush, LineSeparator lineSeparator)
+            throws Throwable {
         super(new BufferedWriter(new OutputStreamWriter(os, "UTF-8")), autoFlush);
         _serverDetails = serverDetails;
         _token = token;
         _tokenApp = tokenApp;
+        _tokenExpiry = tokenExpiry;
         _args = new LinkedHashMap<String, Object>();
         if (args != null) {
             _args.putAll(args);
@@ -79,6 +83,10 @@ public abstract class ClientScriptWriter extends PrintWriter {
 
     public String tokenApp() {
         return _tokenApp;
+    }
+    
+    public Date tokenExpiry() {
+        return _tokenExpiry;
     }
 
     @Override

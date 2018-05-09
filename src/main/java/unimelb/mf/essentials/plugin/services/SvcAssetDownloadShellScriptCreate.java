@@ -2,6 +2,7 @@ package unimelb.mf.essentials.plugin.services;
 
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Date;
 
 import arc.mf.plugin.dtype.BooleanType;
 import arc.mf.plugin.dtype.IntegerType;
@@ -45,8 +46,9 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
         int pageSize = args.intValue("page-size", AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE);
         boolean overwrite = args.booleanValue("overwrite", false);
         boolean verbose = args.booleanValue("verbose", false);
-        AssetDownloadShellScriptWriter w = AssetDownloadShellScriptWriter.create(target, serverDetails, token, pageSize,
-                overwrite, verbose, out);
+        Date tokenExpiry = args.dateValue("token/to", null);
+        AssetDownloadShellScriptWriter w = AssetDownloadShellScriptWriter.create(target, serverDetails, token,
+                tokenExpiry, pageSize, overwrite, verbose, out);
         try {
             if (where != null) {
                 w.addQuery(executor(), where);

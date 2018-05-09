@@ -1,15 +1,17 @@
 package unimelb.mf.essentials.plugin.script.download;
 
 import java.io.OutputStream;
+import java.util.Date;
 
+import arc.utils.DateTime;
 import unimelb.mf.essentials.plugin.script.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScriptWriter {
 
-    public AssetDownloadAtermWindowsScriptWriter(ServerDetails serverDetails, String token, int ncsr, boolean overwrite,
-            boolean verbose, OutputStream os) throws Throwable {
-        super(serverDetails, token, ncsr, overwrite, verbose, os, false, LineSeparator.WINDOWS);
+    public AssetDownloadAtermWindowsScriptWriter(ServerDetails serverDetails, String token, Date tokenExpiry, int ncsr,
+            boolean overwrite, boolean verbose, OutputStream os) throws Throwable {
+        super(serverDetails, token, tokenExpiry, ncsr, overwrite, verbose, os, false, LineSeparator.WINDOWS);
     }
 
     @Override
@@ -19,6 +21,10 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
 
     protected void writeHead() throws Throwable {
         println("@ECHO OFF");
+        
+        if (tokenExpiry() != null) {
+            println("ECHO Mediaflux auth token expiry: " + DateTime.string(tokenExpiry()));
+        }
 
         /*
          * output directory
@@ -65,12 +71,12 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
 
     protected void writeTail() {
         /*
-         * clean up 
+         * clean up
          */
         println();
         println("DEL \"%MFLUX_CFG%\"");
         println("DEL \"%MFLUX_ATERM%\"");
-        
+
         /*
          * exit 0
          */

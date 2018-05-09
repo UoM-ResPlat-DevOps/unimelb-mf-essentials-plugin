@@ -8,7 +8,9 @@ import arc.mf.plugin.ConfigurationResolver;
 import arc.mf.plugin.PluginModule;
 import arc.mf.plugin.PluginService;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadAtermScriptCreate;
+import unimelb.mf.essentials.plugin.services.SvcAssetDownloadAtermScriptUrlCreate;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadShellScriptCreate;
+import unimelb.mf.essentials.plugin.services.SvcAssetDownloadShellScriptUrlCreate;
 
 public class EssentialsPluginModule implements PluginModule {
 
@@ -17,7 +19,10 @@ public class EssentialsPluginModule implements PluginModule {
     public EssentialsPluginModule() {
         _services = new ArrayList<PluginService>();
         _services.add(new SvcAssetDownloadAtermScriptCreate());
+        _services.add(new SvcAssetDownloadAtermScriptUrlCreate());
         _services.add(new SvcAssetDownloadShellScriptCreate());
+        _services.add(new SvcAssetDownloadShellScriptUrlCreate());
+
     }
 
     public String description() {

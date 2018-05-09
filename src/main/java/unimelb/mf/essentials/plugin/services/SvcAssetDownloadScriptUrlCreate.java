@@ -6,9 +6,11 @@ import java.util.List;
 
 import arc.mf.plugin.PluginService;
 import arc.mf.plugin.ServiceExecutor;
+import arc.mf.plugin.Session;
 import arc.mf.plugin.dtype.EmailAddressType;
 import arc.mf.plugin.dtype.StringType;
 import arc.mf.plugin.dtype.XmlDocType;
+import arc.utils.DateTime;
 import arc.xml.XmlDoc;
 import arc.xml.XmlDoc.Element;
 import arc.xml.XmlDocMaker;
@@ -19,6 +21,8 @@ import unimelb.utils.URIBuilder;
 public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
 
     public static final String EXECUTE_SERVLET_PATH = "/mflux/execute.mfjp";
+
+    public static final String DEFAULT_EMAIL_SUBJECT = "Mediaflux Download Script";
 
     protected Interface defn;
 
@@ -58,16 +62,22 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
         String token = createToken(executor(), args);
         if (token != null) {
+            String url = null;
+            Date expiry = args.dateValue("token/to", null);
             try {
                 ServerDetails serverDetails = SvcAssetDownloadScriptCreate.resolveServerDetails(executor(),
                         args.element("server"));
-                String url = createUrl(executor(), serverDetails, token);
-                if (args.elementExists("email")) {
-                    sendEmail(executor(), args.element("email"));
-                }
-                w.add("url", url);
+                url = createUrl(executor(), serverDetails, token);
             } catch (Throwable e) {
+                // in case of error, make sure the token is destroyed.
                 destroyToken(executor(), token);
+                throw e;
+            }
+            if (url != null) {
+                w.add("url", new String[] { "expiry", DateTime.string(expiry) }, url);
+                if (args.elementExists("email")) {
+                    sendEmail(executor(), url, expiry, args.element("email"));
+                }
             }
         } else {
             throw new Exception("Failed to create token.");
@@ -78,8 +88,63 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
 
     protected abstract String filenamePrefix();
 
-    private void sendEmail(ServiceExecutor executor, XmlDoc.Element ee) throws Throwable {
+    private void sendEmail(ServiceExecutor executor, String url, Date expiry, XmlDoc.Element ee) throws Throwable {
+        XmlDocMaker dm = new XmlDocMaker("args");
+        dm.add("async", true);
+        dm.addAll(ee.elements("to"));
+        String userEmail = Session.user().email();
+        if (ee.elementExists("from")) {
+            dm.add(ee.element("from"));
+        } else {
+            if (userEmail != null) {
+                dm.add("from", userEmail);
+            }
+        }
+        if (ee.elementExists("reply-to")) {
+            dm.addAll(ee.elements("reply-to"));
+        } else {
+            if (userEmail != null) {
+                dm.add("reply-to", userEmail);
+            }
+        }
+        if (ee.elementExists("cc")) {
+            dm.addAll(ee.elements("cc"));
+        }
+        if (ee.elementExists("bcc")) {
+            dm.addAll(ee.elements("bcc"));
+        }
+        if (ee.elementExists("subject")) {
+            dm.add(ee.element("subject"));
+        } else {
+            dm.add("subject", DEFAULT_EMAIL_SUBJECT);
+        }
+        dm.add("body", new String[] { "type", "text/html" }, emailMessage(ee.value("body"), url, expiry));
+        executor.execute("mail.send", dm.root());
+    }
 
+    protected String emailMessage(String message, String url, Date expiry) throws Throwable {
+        StringBuilder sb = new StringBuilder();
+        if (message != null) {
+            sb.append(message.replaceAll("(\r\n|\n)", "<br/>"));
+        } else {
+            sb.append("Dear User,<br/><br/>\n");
+            // TODO comprehensive message
+        }
+        sb.append("Please download the <b><a href=\"" + url
+                + "\">scripts</a></b> and extract the zip archive. And to download the data from Mediaflux: <br/>");
+        sb.append("<ul>\n");
+        sb.append("<li>execute .sh script in a terminal window, if you are on Mac OS or Linux.</li>\n");
+        sb.append("<li>execute .cmd script in a command prompt window, if you are on Windows platform.</li>\n");
+        sb.append("</ul>\n");
+        sb.append("<br/><br/>");
+        sb.append("<b>Note:</b> The above download link and the embeded credentials will expire at <b>")
+                .append(DateTime.string(expiry)).append("</b>.");
+        String userFullName = Session.user().fullName();
+        if (userFullName != null) {
+            sb.append("<br/></br>");
+            sb.append(userFullName);
+        }
+        return sb.toString();
     }
 
     private String createToken(ServiceExecutor executor, XmlDoc.Element args) throws Throwable {
@@ -115,7 +180,14 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         dm.add("max-token-length", 20);
         dm.add("tag", tokenTag());
         dm.push("service", new String[] { "name", SvcAssetDownloadAtermScriptCreate.SERVICE_NAME });
-        dm.add(args, false);
+        List<XmlDoc.Element> ees = args.elements();
+        if (ees != null) {
+            for (XmlDoc.Element ee : ees) {
+                if (!"email".equals(ee.name())) { // exclude email argument
+                    dm.add(ee);
+                }
+            }
+        }
         dm.pop();
         return executor.execute("secure.identity.token.create", dm.root()).value("token");
     }
