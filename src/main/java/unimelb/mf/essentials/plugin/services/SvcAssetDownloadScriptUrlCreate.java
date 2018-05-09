@@ -38,7 +38,8 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         Interface.Element email = new Interface.Element("email", XmlDocType.DEFAULT,
                 "email the link to the specified recipients.", 0, 1);
         email.add(new Interface.Attribute("bcc-self", BooleanType.DEFAULT,
-                "Send blind carbon copy to the calling user self if the user account has email set. Defaults to true."));
+                "Send blind carbon copy to the calling user self if the user account has email set. Defaults to true.",
+                0));
         email.add(new Interface.Element("from", EmailAddressType.DEFAULT,
                 "The reply address. If not set, uses default for the domain.", 0, 1));
         email.add(new Interface.Element("to", EmailAddressType.DEFAULT, "The recipient(s).", 1, Integer.MAX_VALUE));
