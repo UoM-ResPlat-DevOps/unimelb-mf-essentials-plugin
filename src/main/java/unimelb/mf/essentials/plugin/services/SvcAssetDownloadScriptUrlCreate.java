@@ -1,12 +1,14 @@
 package unimelb.mf.essentials.plugin.services;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import arc.mf.plugin.PluginService;
 import arc.mf.plugin.ServiceExecutor;
 import arc.mf.plugin.Session;
+import arc.mf.plugin.dtype.BooleanType;
 import arc.mf.plugin.dtype.EmailAddressType;
 import arc.mf.plugin.dtype.StringType;
 import arc.mf.plugin.dtype.XmlDocType;
@@ -35,6 +37,8 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     static void addToDefn(Interface defn) {
         Interface.Element email = new Interface.Element("email", XmlDocType.DEFAULT,
                 "email the link to the specified recipients.", 0, 1);
+        email.add(new Interface.Attribute("bcc-self", BooleanType.DEFAULT,
+                "Send blind carbon copy to the calling user self if the user account has email set. Defaults to true."));
         email.add(new Interface.Element("from", EmailAddressType.DEFAULT,
                 "The reply address. If not set, uses default for the domain.", 0, 1));
         email.add(new Interface.Element("to", EmailAddressType.DEFAULT, "The recipient(s).", 1, Integer.MAX_VALUE));
@@ -87,10 +91,11 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     protected abstract String tokenTag();
 
     protected abstract String filenamePrefix();
-    
+
     protected abstract String scriptCreateServiceName();
 
     private void sendEmail(ServiceExecutor executor, String url, Date expiry, XmlDoc.Element ee) throws Throwable {
+        boolean bccSelf = ee.booleanValue("bcc-self", true);
         XmlDocMaker dm = new XmlDocMaker("args");
         dm.add("async", true);
         dm.addAll(ee.elements("to"));
@@ -112,8 +117,18 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         if (ee.elementExists("cc")) {
             dm.addAll(ee.elements("cc"));
         }
+        if (userEmail != null && bccSelf) {
+            dm.add("bcc", userEmail);
+        }
         if (ee.elementExists("bcc")) {
-            dm.addAll(ee.elements("bcc"));
+            Collection<String> bccs = ee.values("bcc");
+            for (String bcc : bccs) {
+                if (userEmail != null && bccSelf && userEmail.equalsIgnoreCase(bcc)) {
+                    // skip, because already added.
+                } else {
+                    dm.add("bcc", bcc);
+                }
+            }
         }
         if (ee.elementExists("subject")) {
             dm.add(ee.element("subject"));
