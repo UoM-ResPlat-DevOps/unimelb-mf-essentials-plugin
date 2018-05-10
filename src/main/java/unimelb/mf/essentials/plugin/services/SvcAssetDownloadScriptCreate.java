@@ -268,6 +268,26 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         if (tokenTag != null) {
             dm.add("tag", tokenTag);
         }
+        // @formatter:off
+//        /*
+//         * permissions required by aterm script
+//         */
+//        dm.push("perm");
+//        dm.add("resource", new String[] { "type", "service" }, "asset.query");
+//        dm.add("access", "ACCESS");
+//        dm.pop();
+//        dm.push("perm");
+//        dm.add("resource", new String[] { "type", "service" }, "asset.get");
+//        dm.add("access", "ACCESS");
+//        dm.pop();
+//        /*
+//         * permissions required by content.mfjp (shell script)
+//         */
+//        dm.push("perm");
+//        dm.add("resource", new String[] { "type", "service" }, "asset.content.get");
+//        dm.add("access", "ACCESS");
+//        dm.pop();
+//        @formatter:on
         return executor.execute("secure.identity.token.create", dm.root()).value("token");
     }
 

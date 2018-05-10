@@ -146,31 +146,8 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         executor.execute("mail.send", dm.root());
     }
 
-    protected String emailMessage(String message, String url, Date expiry) throws Throwable {
-        StringBuilder sb = new StringBuilder();
-        if (message != null) {
-            sb.append(message.replaceAll("(\r\n|\n)", "<br/>"));
-        } else {
-            sb.append("Dear User,<br/><br/>\n");
-            // TODO comprehensive message
-        }
-        sb.append("Please download the <b><a href=\"" + url
-                + "\">scripts</a></b> and extract the zip archive. And to download the data from Mediaflux: <br/>");
-        sb.append("<ul>\n");
-        sb.append("<li>execute .sh script in a terminal window, if you are on Mac OS or Linux.</li>\n");
-        sb.append("<li>execute .cmd script in a command prompt window, if you are on Windows platform.</li>\n");
-        sb.append("</ul>\n");
-        sb.append("<br/><br/>");
-        sb.append("<b>Note:</b> The above download link and the embeded credentials will expire at <b>")
-                .append(DateTime.string(expiry)).append("</b>.");
-        String userFullName = Session.user().fullName();
-        if (userFullName != null) {
-            sb.append("<br/></br>");
-            sb.append(userFullName);
-        }
-        return sb.toString();
-    }
-
+    protected abstract String emailMessage(String message, String url, Date expiry) throws Throwable;
+    
     private String createToken(ServiceExecutor executor, XmlDoc.Element args) throws Throwable {
         XmlDoc.Element te = args.element("token");
         XmlDocMaker dm = new XmlDocMaker("args");
