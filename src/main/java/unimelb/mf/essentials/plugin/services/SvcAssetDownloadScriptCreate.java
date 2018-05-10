@@ -114,6 +114,15 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
                 "Role (name) to grant. If not specified, defaults to the calling user.", 0, Integer.MAX_VALUE);
         tokenRole.add(new Interface.Attribute("type", new StringType(64), "Role type.", 1));
         token.add(tokenRole);
+
+        Interface.Element tokenPerm = new Interface.Element("perm", XmlDocType.DEFAULT, "Permission to grant.");
+        tokenPerm.add(new Interface.Element("access", new StringType(64), "Access type.", 1, 1));
+        Interface.Element resource = new Interface.Element("resource", new StringType(255), "Pattern for resource.", 1,
+                1);
+        resource.add(new Interface.Attribute("type", new StringType(32), "Resource type.", 1));
+        tokenPerm.add(resource);
+        token.add(tokenPerm);
+
         token.add(new Interface.Element("from", DateType.DEFAULT,
                 "A time, before which the token is not valid. If not supplied token is valid immediately.", 0, 1));
         token.add(new Interface.Element("to", DateType.DEFAULT,
@@ -265,8 +274,15 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
             XmlDoc.Element ae = executor.execute("actor.self.describe").element("actor");
             dm.add("role", new String[] { "type", ae.value("@type") }, ae.value("@name"));
         }
+
         if (tokenTag != null) {
             dm.add("tag", tokenTag);
+        }
+        if (te != null && te.elementExists("perm")) {
+            List<XmlDoc.Element> pes = te.elements("perm");
+            for (XmlDoc.Element pe : pes) {
+                dm.add(pe);
+            }
         }
         // @formatter:off
 //        /*
