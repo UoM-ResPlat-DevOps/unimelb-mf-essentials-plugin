@@ -18,10 +18,10 @@ public class SvcAssetDownloadShellScriptCreate extends SvcAssetDownloadScriptCre
 
     public SvcAssetDownloadShellScriptCreate() {
         super();
-        SvcAssetDownloadShellScriptCreate.addToDefn(this.defn);
+        addToDefn(this.defn);
     }
 
-    static void addToDefn(Interface defn) {
+    private static void addToDefn(Interface defn) {
         defn.add(new Interface.Element("page-size", IntegerType.POSITIVE_ONE,
                 "Query page size. Defaults to " + AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE, 0, 1));
         defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,

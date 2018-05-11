@@ -18,10 +18,10 @@ public class SvcAssetDownloadAtermScriptCreate extends SvcAssetDownloadScriptCre
 
     public SvcAssetDownloadAtermScriptCreate() {
         super();
-        SvcAssetDownloadAtermScriptCreate.addToDefn(this.defn);
+        addToDefn(this.defn);
     }
 
-    static void addToDefn(Interface defn) {
+    private static void addToDefn(Interface defn) {
         defn.add(new Interface.Element("ncsr", IntegerType.POSITIVE_ONE,
                 "Number of concurrent server requests. Defaults to 1", 0, 1));
         defn.add(new Interface.Element("overwrite", BooleanType.DEFAULT,

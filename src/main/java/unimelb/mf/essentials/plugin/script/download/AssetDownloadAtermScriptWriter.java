@@ -4,13 +4,12 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 
-import unimelb.mf.essentials.plugin.script.ClientScriptWriter;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadScriptCreate.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 import unimelb.utils.MapUtils;
 import unimelb.utils.URIBuilder;
 
-public abstract class AssetDownloadAtermScriptWriter extends ClientScriptWriter {
+public abstract class AssetDownloadAtermScriptWriter extends AssetDownloadScriptWriter {
 
     public static final String TOKEN_APP = "aterm";
 

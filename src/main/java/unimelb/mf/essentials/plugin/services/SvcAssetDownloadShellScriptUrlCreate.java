@@ -3,19 +3,31 @@ package unimelb.mf.essentials.plugin.services;
 import java.util.Date;
 
 import arc.mf.plugin.Session;
+import arc.mf.plugin.dtype.BooleanType;
+import arc.mf.plugin.dtype.IntegerType;
 import arc.utils.DateTime;
+import unimelb.mf.essentials.plugin.script.download.AssetDownloadShellScriptWriter;
 
 public class SvcAssetDownloadShellScriptUrlCreate extends SvcAssetDownloadScriptUrlCreate {
 
     public static final String SERVICE_NAME = "unimelb.asset.download.shell.script.url.create";
 
-    public static final String TOKEN_TAG = "UNIMELB_ASSET_DOWNLOAD_SHELL_SCRIPT_URL";
+    public static final String TOKEN_TAG = "UNIMELB_DOWNLOAD_SHELL_SCRIPT_URL";
 
     public static final String FILENAME_PREFIX = "unimelb-asset-download-shell-script";
 
     public SvcAssetDownloadShellScriptUrlCreate() {
         super();
-        SvcAssetDownloadShellScriptCreate.addToDefn(this.defn);
+    }
+
+    @Override
+    protected void addToDownloadDefn(Interface.Element download) {
+        download.add(new Interface.Element("page-size", IntegerType.POSITIVE_ONE,
+                "Query page size. Defaults to " + AssetDownloadShellScriptWriter.DEFAULT_PAGE_SIZE, 0, 1));
+        download.add(new Interface.Element("overwrite", BooleanType.DEFAULT,
+                "Whether or not overwrite existing files. Defaults to false", 0, 1));
+        download.add(new Interface.Element("verbose", BooleanType.DEFAULT,
+                "Whether or not display the files being downloaded. Defaults to false", 0, 1));
     }
 
     @Override
@@ -62,8 +74,10 @@ public class SvcAssetDownloadShellScriptUrlCreate extends SvcAssetDownloadScript
         sb.append("<br/><br/>");
         sb.append("<h3>Note:</h3>\n");
         sb.append("<ul>\n");
-        sb.append("<li>It is recommended to use Chrome or Firefox browser to download the above link. If the link is blocked by your mail server(mimecast), copy the url and paste in the browser's address field.</li>\n");
-        sb.append("<li>The auth token associated the scripts and the download link will expire at <b>").append(DateTime.string(expiry)).append("</b>.</li>\n");
+        sb.append(
+                "<li>It is recommended to use Chrome or Firefox browser to download the above link. If the link is blocked by your mail server(mimecast), copy the url and paste in the browser's address field.</li>\n");
+        sb.append("<li>The auth token associated the scripts and the download link will expire at <b>")
+                .append(DateTime.string(expiry)).append("</b>.</li>\n");
         sb.append("</ul>\n");
         String userFullName = Session.user().fullName();
         if (userFullName != null) {

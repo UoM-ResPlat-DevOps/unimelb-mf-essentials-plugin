@@ -3,13 +3,15 @@ package unimelb.mf.essentials.plugin.services;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import arc.mf.plugin.PluginService;
 import arc.mf.plugin.ServiceExecutor;
 import arc.mf.plugin.Session;
 import arc.mf.plugin.dtype.BooleanType;
+import arc.mf.plugin.dtype.DateType;
 import arc.mf.plugin.dtype.EmailAddressType;
+import arc.mf.plugin.dtype.EnumType;
+import arc.mf.plugin.dtype.IntegerType;
 import arc.mf.plugin.dtype.StringType;
 import arc.mf.plugin.dtype.XmlDocType;
 import arc.utils.DateTime;
@@ -17,6 +19,8 @@ import arc.xml.XmlDoc;
 import arc.xml.XmlDoc.Element;
 import arc.xml.XmlDocMaker;
 import arc.xml.XmlWriter;
+import unimelb.mf.essentials.plugin.script.download.AssetDownloadScriptWriter;
+import unimelb.mf.essentials.plugin.services.SvcAssetDownloadScriptCreate.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 import unimelb.utils.URIBuilder;
 
@@ -26,15 +30,14 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
 
     public static final String DEFAULT_EMAIL_SUBJECT = "Mediaflux Download Script";
 
-    protected Interface defn;
+    private Interface _defn;
 
     protected SvcAssetDownloadScriptUrlCreate() {
-        this.defn = new Interface();
-        addToDefn(this.defn);
-        SvcAssetDownloadScriptCreate.addToDefn(this.defn);
-    }
 
-    static void addToDefn(Interface defn) {
+        _defn = new Interface();
+        /*
+         * email notification
+         */
         Interface.Element email = new Interface.Element("email", XmlDocType.DEFAULT,
                 "email the link to the specified recipients.", 0, 1);
         email.add(new Interface.Attribute("bcc-self", BooleanType.DEFAULT,
@@ -50,7 +53,95 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
         email.add(new Interface.Element("reply-to", EmailAddressType.DEFAULT, "The reply address.", 0, 1));
         email.add(new Interface.Element("subject", StringType.DEFAULT, "Message subject.", 0, 1));
         email.add(new Interface.Element("body", StringType.DEFAULT, "Message content.", 0, 1));
-        defn.add(email);
+        _defn.add(email);
+
+        /*
+         * download (download script specification.)
+         */
+        Interface.Element download = new Interface.Element("download", XmlDocType.DEFAULT,
+                "Download script specification.", 1, 1);
+
+        download.add(new Interface.Element("name", StringType.DEFAULT, "The output script file name.", 0, 1));
+
+        download.add(new Interface.Element("where", StringType.DEFAULT, "The query to select the assets to download.",
+                0, 1));
+
+        download.add(new Interface.Element("namespace", StringType.DEFAULT, "The asset namespace to download.", 0,
+                Integer.MAX_VALUE));
+
+        // download - target os
+        download.add(new Interface.Element("target", new EnumType(TargetOS.values()),
+                "The target operating system. If not specified, the scripts for both windows and unix are generated.",
+                0, 1));
+
+        // download - server
+        Interface.Element server = new Interface.Element("server", XmlDocType.DEFAULT,
+                "Mediaflux server details. If not specified, it will try auto-detecting from the current session.", 0,
+                1);
+
+        server.add(new Interface.Element("host", StringType.DEFAULT, "server host address", 0, 1));
+
+        server.add(new Interface.Element("port", new IntegerType(0, 65535), "server host address", 0, 1));
+
+        server.add(new Interface.Element("transport", new EnumType(new String[] { "http", "https" }),
+                "server transport: http or https?", 0, 1));
+        download.add(server);
+
+        // download - token
+        Interface.Element downloadToken = new Interface.Element("token", XmlDocType.DEFAULT,
+                "Downloader token specification.", 1, 1);
+        Interface.Element downloadTokenRole = new Interface.Element("role", new StringType(128),
+                "Role (name) to grant. If not specified, defaults to the calling user.", 0, Integer.MAX_VALUE);
+        downloadTokenRole.add(new Interface.Attribute("type", new StringType(64), "Role type.", 1));
+        downloadToken.add(downloadTokenRole);
+
+        Interface.Element downloadTokenPerm = new Interface.Element("perm", XmlDocType.DEFAULT, "Permission to grant.",
+                0, Integer.MAX_VALUE);
+        downloadTokenPerm.add(new Interface.Element("access", new StringType(64), "Access type.", 1, 1));
+        Interface.Element downloadTokenPermResource = new Interface.Element("resource", new StringType(255),
+                "Pattern for resource.", 1, 1);
+        downloadTokenPermResource.add(new Interface.Attribute("type", new StringType(32), "Resource type.", 1));
+        downloadTokenPerm.add(downloadTokenPermResource);
+        downloadToken.add(downloadTokenPerm);
+
+        downloadToken.add(new Interface.Element("from", DateType.DEFAULT,
+                "A time, before which the token is not valid. If not supplied token is valid immediately.", 0, 1));
+        downloadToken.add(new Interface.Element("to", DateType.DEFAULT,
+                "A time, after which the token is no longer valid. If not supplied token will not expire.", 1, 1));
+        downloadToken.add(new Interface.Element("use-count", IntegerType.POSITIVE_ONE,
+                "The number of times the token may be used.", 0, 1));
+        download.add(downloadToken);
+
+        // download - other arguments (to be added by sub-classes)
+        addToDownloadDefn(download);
+        _defn.add(download);
+
+        /*
+         * token (script generator token)
+         */
+        // download - token
+        Interface.Element token = new Interface.Element("token", XmlDocType.DEFAULT,
+                "Script generator token specification. It is to specify additional roles and permissions ONLY for the script generator token. In other words, the roles and permissions won't be passed to downloader token.",
+                0, 1);
+        Interface.Element tokenRole = new Interface.Element("role", new StringType(128),
+                "Role (name) to grant. If not specified, defaults to the calling user.", 0, Integer.MAX_VALUE);
+        tokenRole.add(new Interface.Attribute("type", new StringType(64), "Role type.", 1));
+        token.add(tokenRole);
+
+        Interface.Element tokenPerm = new Interface.Element("perm", XmlDocType.DEFAULT, "Permission to grant.", 0,
+                Integer.MAX_VALUE);
+        tokenPerm.add(new Interface.Element("access", new StringType(64), "Access type.", 1, 1));
+        Interface.Element tokenPermResource = new Interface.Element("resource", new StringType(255),
+                "Pattern for resource.", 1, 1);
+        tokenPermResource.add(new Interface.Attribute("type", new StringType(32), "Resource type.", 1));
+        tokenPerm.add(tokenPermResource);
+        token.add(tokenPerm);
+
+        _defn.add(token);
+    }
+
+    protected void addToDownloadDefn(Interface.Element download) {
+
     }
 
     @Override
@@ -60,28 +151,28 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
 
     @Override
     public Interface definition() {
-        return this.defn;
+        return _defn;
     }
 
     @Override
     public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
-        
+
         /*
          * check if specified namespaces and roles exist
          */
-        SvcAssetDownloadScriptCreate.validateArgs(executor(), args);
-        
+        SvcAssetDownloadScriptCreate.validateArgs(executor(), args.element("download"));
+
         String token = createToken(executor(), args);
         if (token != null) {
             String url = null;
-            Date expiry = args.dateValue("token/to", null);
+            Date expiry = args.dateValue("download/token/to", null);
             try {
                 ServerDetails serverDetails = SvcAssetDownloadScriptCreate.resolveServerDetails(executor(),
-                        args.element("server"));
+                        args.element("download/server"));
                 url = createUrl(executor(), serverDetails, token);
             } catch (Throwable e) {
                 // in case of error, make sure the token is destroyed.
-                destroyToken(executor(), token);
+                SvcAssetDownloadScriptCreate.destroyToken(executor(), token);
                 throw e;
             }
             if (url != null) {
@@ -147,56 +238,61 @@ public abstract class SvcAssetDownloadScriptUrlCreate extends PluginService {
     }
 
     protected abstract String emailMessage(String message, String url, Date expiry) throws Throwable;
-    
+
     private String createToken(ServiceExecutor executor, XmlDoc.Element args) throws Throwable {
-        XmlDoc.Element te = args.element("token");
+        XmlDoc.Element dte = args.element("download/token");
         XmlDocMaker dm = new XmlDocMaker("args");
-        if (te != null && te.elementExists("from")) {
-            dm.add(te.element("from"));
+        if (dte != null && dte.elementExists("from")) {
+            dm.add(dte.element("from"));
         }
-        dm.add(te.element("to"));
-        if (te != null && te.elementExists("use-count")) {
-            dm.add(te.element("use-count"));
+        dm.add(dte.element("to"));
+        if (dte != null && dte.elementExists("use-count")) {
+            dm.add(dte.element("use-count"));
         }
-        if (te != null && te.elementExists("role")) {
-            boolean hasUserRole = false;
-            List<XmlDoc.Element> res = te.elements("role");
-            for (XmlDoc.Element re : res) {
-                String type = re.value("@type");
-                String role = re.value();
-                if ("role".equalsIgnoreCase(type) && "user".equalsIgnoreCase(role)) {
-                    hasUserRole = true;
-                }
-                dm.add(re);
+        /*
+         * roles
+         */
+        // grant unimelb:token-downloader role
+        dm.add("role", new String[] { "type", "role" }, AssetDownloadScriptWriter.TOKEN_DOWNLOADER_ROLE);
+        if (args.elementExists("token/role") || args.elementExists("download/token/role")) {
+            if (args.elementExists("token/role")) {
+                // roles only for script generator token
+                dm.addAll(args.elements("token/role"));
             }
-            if (!hasUserRole) {
-                dm.add("role", new String[] { "type", "role" }, "user");
+            if (args.elementExists("download/token/role")) {
+                // all download token roles should also be added
+                dm.addAll(dte.elements("role"));
             }
         } else {
-            dm.add("role", new String[] { "type", "role" }, "user");
-            dm.add("role", new String[] { "type", "user" },
-                    executor.execute("actor.self.describe").value("actor/@name"));
+            // TODO remove
+//            XmlDoc.Element ae = executor.execute("actor.self.describe").element("actor");
+//            dm.add("role", new String[] { "type", ae.value("@type") }, ae.value("@name"));
         }
+
+        /*
+         * perms
+         */
+        // grant perm to execute the script generator service
+        dm.push("perm");
+        dm.add("resource", new String[] { "type", "service" }, scriptCreateServiceName());
+        dm.add("access", "MODIFY");
+        dm.pop();
+        if (args.elementExists("token/perm")) {
+            // perms only for script generator token
+            dm.addAll(args.elements("token/perm"));
+        }
+        if (args.elementExists("download/token/perm")) {
+            // all download token perms should also be added
+            dm.addAll(dte.elements("perm"));
+        }
+
         dm.add("min-token-length", 20);
         dm.add("max-token-length", 20);
         dm.add("tag", tokenTag());
         dm.push("service", new String[] { "name", scriptCreateServiceName() });
-        List<XmlDoc.Element> ees = args.elements();
-        if (ees != null) {
-            for (XmlDoc.Element ee : ees) {
-                if (!"email".equals(ee.name())) { // exclude email argument
-                    dm.add(ee);
-                }
-            }
-        }
+        dm.add(args.element("download"), false);
         dm.pop();
         return executor.execute("secure.identity.token.create", dm.root()).value("token");
-    }
-
-    private void destroyToken(ServiceExecutor executor, String token) throws Throwable {
-        XmlDocMaker dm = new XmlDocMaker("args");
-        dm.add("token", token);
-        executor.execute("secure.identity.token.destroy", dm.root());
     }
 
     private String createUrl(ServiceExecutor executor, ServerDetails serverDetails, String token) throws Throwable {

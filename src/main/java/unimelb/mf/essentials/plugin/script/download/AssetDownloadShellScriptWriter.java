@@ -9,14 +9,13 @@ import java.util.List;
 import arc.mf.plugin.ServiceExecutor;
 import arc.xml.XmlDoc;
 import arc.xml.XmlDocMaker;
-import unimelb.mf.essentials.plugin.script.ClientScriptWriter;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadScriptCreate.TargetOS;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 import unimelb.utils.MapUtils;
 import unimelb.utils.PathUtils;
 import unimelb.utils.URIBuilder;
 
-public abstract class AssetDownloadShellScriptWriter extends ClientScriptWriter {
+public abstract class AssetDownloadShellScriptWriter extends AssetDownloadScriptWriter {
 
     public static final String SERVLET_PATH = "/mflux/content.mfjp";
     public static final String TOKEN_APP = "content.mfjp"; // "servlet:arc.mflux.content";

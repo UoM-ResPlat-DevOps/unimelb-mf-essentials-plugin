@@ -4,7 +4,7 @@
 
 	<groupId>au.edu.unimelb.mf</groupId>
 	<artifactId>unimelb-mf-essentials-plugin</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.5</version>
 	<packaging>jar</packaging>
 
 	<name>unimelb-mf-essentials-plugin</name>

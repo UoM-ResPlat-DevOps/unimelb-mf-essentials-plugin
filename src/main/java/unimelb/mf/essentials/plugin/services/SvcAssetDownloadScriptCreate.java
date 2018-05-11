@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Collection;
-import java.util.List;
 
 import arc.archive.ArchiveOutput;
 import arc.archive.ArchiveRegistry;
@@ -24,6 +23,7 @@ import arc.xml.XmlDoc;
 import arc.xml.XmlDoc.Element;
 import arc.xml.XmlDocMaker;
 import arc.xml.XmlWriter;
+import unimelb.mf.essentials.plugin.script.download.AssetDownloadScriptWriter;
 import unimelb.mf.essentials.plugin.util.ServerDetails;
 
 public abstract class SvcAssetDownloadScriptCreate extends PluginService {
@@ -75,7 +75,7 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         SvcAssetDownloadScriptCreate.addToDefn(this.defn);
     }
 
-    static void addToDefn(Interface defn) {
+    private static void addToDefn(Interface defn) {
 
         defn.add(new Interface.Element("name", StringType.DEFAULT, "The output script file name.", 0, 1));
 
@@ -115,7 +115,8 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         tokenRole.add(new Interface.Attribute("type", new StringType(64), "Role type.", 1));
         token.add(tokenRole);
 
-        Interface.Element tokenPerm = new Interface.Element("perm", XmlDocType.DEFAULT, "Permission to grant.");
+        Interface.Element tokenPerm = new Interface.Element("perm", XmlDocType.DEFAULT, "Permission to grant.", 0,
+                Integer.MAX_VALUE);
         tokenPerm.add(new Interface.Element("access", new StringType(64), "Access type.", 1, 1));
         Interface.Element resource = new Interface.Element("resource", new StringType(255), "Pattern for resource.", 1,
                 1);
@@ -203,7 +204,12 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
                         pos.close();
                     }
                 } catch (Throwable e) {
-                    // destroy token and rethrow
+                    // destroy token and log
+                    try {
+                        destroyToken(executor(), token);
+                    } catch (Throwable e1) {
+                        e1.printStackTrace();
+                    }
                     e.printStackTrace();
                 }
             }
@@ -255,56 +261,37 @@ public abstract class SvcAssetDownloadScriptCreate extends PluginService {
         if (te != null && te.elementExists("use-count")) {
             dm.add(te.element("use-count"));
         }
+        /*
+         * roles
+         */
+        // grant unimelb:token-downloader role
+        dm.add("role", new String[] { "type", "role" }, AssetDownloadScriptWriter.TOKEN_DOWNLOADER_ROLE);
         if (te != null && te.elementExists("role")) {
-            boolean hasUserRole = false;
-            List<XmlDoc.Element> res = te.elements("role");
-            for (XmlDoc.Element re : res) {
-                String type = re.value("@type");
-                String role = re.value();
-                if ("role".equalsIgnoreCase(type) && "user".equalsIgnoreCase(role)) {
-                    hasUserRole = true;
-                }
-                dm.add(re);
-            }
-            if (!hasUserRole) {
-                dm.add("role", new String[] { "type", "role" }, "user");
-            }
+            dm.addAll(te.elements("role"));
         } else {
-            dm.add("role", new String[] { "type", "role" }, "user");
-            XmlDoc.Element ae = executor.execute("actor.self.describe").element("actor");
-            dm.add("role", new String[] { "type", ae.value("@type") }, ae.value("@name"));
+            // TODO remove
+//            XmlDoc.Element ae = executor.execute("actor.self.describe").element("actor");
+//            dm.add("role", new String[] { "type", ae.value("@type") }, ae.value("@name"));
+        }
+
+        /*
+         * perms
+         */
+        if (te != null && te.elementExists("perm")) {
+            dm.addAll(te.elements("perm"));
         }
 
         if (tokenTag != null) {
             dm.add("tag", tokenTag);
         }
-        if (te != null && te.elementExists("perm")) {
-            List<XmlDoc.Element> pes = te.elements("perm");
-            for (XmlDoc.Element pe : pes) {
-                dm.add(pe);
-            }
-        }
-        // @formatter:off
-//        /*
-//         * permissions required by aterm script
-//         */
-//        dm.push("perm");
-//        dm.add("resource", new String[] { "type", "service" }, "asset.query");
-//        dm.add("access", "ACCESS");
-//        dm.pop();
-//        dm.push("perm");
-//        dm.add("resource", new String[] { "type", "service" }, "asset.get");
-//        dm.add("access", "ACCESS");
-//        dm.pop();
-//        /*
-//         * permissions required by content.mfjp (shell script)
-//         */
-//        dm.push("perm");
-//        dm.add("resource", new String[] { "type", "service" }, "asset.content.get");
-//        dm.add("access", "ACCESS");
-//        dm.pop();
-//        @formatter:on
+
         return executor.execute("secure.identity.token.create", dm.root()).value("token");
+    }
+
+    static void destroyToken(ServiceExecutor executor, String token) throws Throwable {
+        XmlDocMaker dm = new XmlDocMaker("args");
+        dm.add("token", token);
+        executor.execute("secure.identity.token.destroy", dm.root());
     }
 
     static ServerDetails resolveServerDetails(ServiceExecutor executor, Element se) throws Throwable {
