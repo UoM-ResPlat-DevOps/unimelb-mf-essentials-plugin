@@ -30,8 +30,11 @@ public class AssetDownloadAtermWindowsScriptWriter extends AssetDownloadAtermScr
          * output directory
          */
         println();
-        println("SET DIR=%1");
-        println("IF [%1]==[] SET DIR=%CD%");
+        println("SET \"DIR=%~1\"");
+        println("IF \"%DIR%\"==\"\" SET \"DIR=%CD%\"");
+        // Remove trailing slash
+        println("IF \"%DIR:~-1%\"==\"\\\" SET \"DIR=%DIR:~0,-1%\"");
+        println("IF \"%DIR:~-1%\"==\"/\" SET \"DIR=%DIR:~0,-1%\"");
 
         /*
          * check java
