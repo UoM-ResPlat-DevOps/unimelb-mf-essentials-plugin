@@ -1,5 +1,7 @@
 package unimelb.mf.essentials.plugin.services;
 
+import java.util.List;
+
 import arc.mf.plugin.PluginService;
 import arc.mf.plugin.ServiceExecutor;
 import arc.mf.plugin.atomic.AtomicOperation;
@@ -38,14 +40,13 @@ public class SvcUserSettingsCopy extends PluginService {
     @Override
     public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
         XmlDoc.Element from = args.element("from");
-        XmlDoc.Element to = args.element("to");
-        final XmlDoc.Element sse = getUserSettings(executor(), from);
-        final XmlDoc.Element dse = getUserSettings(executor(), to);
+        final XmlDoc.Element toUser = args.element("to");
+        final XmlDoc.Element fromSettings = getUserSettings(executor(), from);
 
         new AtomicTransaction(new AtomicOperation() {
             @Override
             public boolean execute(ServiceExecutor executor) throws Throwable {
-                copyUserSettings(executor(), sse, dse);
+                copyUserSettings(executor(), fromSettings, toUser);
                 return false;
             }
         }).execute(executor());
@@ -58,8 +59,26 @@ public class SvcUserSettingsCopy extends PluginService {
         return executor.execute("user.settings.get", dm.root());
     }
 
-    static void copyUserSettings(ServiceExecutor executor, Element from, Element to) throws Throwable {
-        // TODO
+    static void copyUserSettings(ServiceExecutor executor, Element fromSettings, Element toUser) throws Throwable {
+        List<XmlDoc.Element> ses = fromSettings.elements("settings");
+        if (ses == null || ses.isEmpty()) {
+            return;
+        }
+        for (XmlDoc.Element se : ses) {
+            if (se.hasSubElements()) {
+                XmlDocMaker dm = new XmlDocMaker("args");
+                if (toUser.elementExists("authority")) {
+                    dm.add(toUser.element("authority"));
+                }
+                dm.add(toUser.element("domain"));
+                dm.add(toUser.element("user"));
+                dm.add("app", se.value("@app"));
+                dm.push("settings");
+                dm.add(se, false);
+                dm.pop();
+                executor.execute("user.settings.set", dm.root());
+            }
+        }
     }
 
     @Override

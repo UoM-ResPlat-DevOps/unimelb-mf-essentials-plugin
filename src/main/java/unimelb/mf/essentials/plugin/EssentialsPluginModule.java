@@ -11,6 +11,10 @@ import unimelb.mf.essentials.plugin.services.SvcAssetDownloadAtermScriptCreate;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadAtermScriptUrlCreate;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadShellScriptCreate;
 import unimelb.mf.essentials.plugin.services.SvcAssetDownloadShellScriptUrlCreate;
+import unimelb.mf.essentials.plugin.services.SvcUserMetadataCopy;
+import unimelb.mf.essentials.plugin.services.SvcUserPermissionsCopy;
+import unimelb.mf.essentials.plugin.services.SvcUserProfileCopy;
+import unimelb.mf.essentials.plugin.services.SvcUserSettingsCopy;
 
 public class EssentialsPluginModule implements PluginModule {
 
@@ -22,6 +26,10 @@ public class EssentialsPluginModule implements PluginModule {
         _services.add(new SvcAssetDownloadAtermScriptUrlCreate());
         _services.add(new SvcAssetDownloadShellScriptCreate());
         _services.add(new SvcAssetDownloadShellScriptUrlCreate());
+        _services.add(new SvcUserMetadataCopy());
+        _services.add(new SvcUserPermissionsCopy());
+        _services.add(new SvcUserProfileCopy());
+        _services.add(new SvcUserSettingsCopy());
 
     }
 

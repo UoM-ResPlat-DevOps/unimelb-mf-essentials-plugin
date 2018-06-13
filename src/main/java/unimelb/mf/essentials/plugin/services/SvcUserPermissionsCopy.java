@@ -1,5 +1,7 @@
 package unimelb.mf.essentials.plugin.services;
 
+import java.util.List;
+
 import arc.mf.plugin.PluginService;
 import arc.mf.plugin.ServiceExecutor;
 import arc.mf.plugin.atomic.AtomicOperation;
@@ -37,22 +39,43 @@ public class SvcUserPermissionsCopy extends PluginService {
 
     @Override
     public void execute(Element args, Inputs inputs, Outputs outputs, XmlWriter w) throws Throwable {
-        XmlDoc.Element from = args.element("from");
-        XmlDoc.Element to = args.element("to");
-        final XmlDoc.Element sae = describeActor(executor(), from);
-        final XmlDoc.Element dae = describeActor(executor(), to);
+        XmlDoc.Element fromUser = args.element("from");
+        final XmlDoc.Element toUser = args.element("to");
+        final XmlDoc.Element fromActor = describeActor(executor(), fromUser);
 
         new AtomicTransaction(new AtomicOperation() {
             @Override
             public boolean execute(ServiceExecutor executor) throws Throwable {
-                copyUserPermissions(executor(), sae, dae);
+                copyUserPermissions(executor(), fromActor, toUser);
                 return false;
             }
         }).execute(executor());
     }
 
-    static void copyUserPermissions(ServiceExecutor executor, Element sae, Element dae) throws Throwable {
-        // TODO
+    static void copyUserPermissions(ServiceExecutor executor, Element fromActor, Element toUser) throws Throwable {
+        List<XmlDoc.Element> res = fromActor.elements("role");
+        List<XmlDoc.Element> pes = fromActor.elements("perm");
+        if ((res == null || res.isEmpty()) && (pes == null || pes.isEmpty())) {
+            return;
+        }
+
+        XmlDocMaker dm = new XmlDocMaker("args");
+        if (toUser.elementExists("authority")) {
+            dm.add(toUser.element("authority"));
+        }
+        dm.add(toUser.element("domain"));
+        dm.add(toUser.element("user"));
+        if (res != null) {
+            for (XmlDoc.Element re : res) {
+                dm.add("role", new String[] { "type", re.value("@type") }, re.value());
+            }
+        }
+        if (pes != null) {
+            for (XmlDoc.Element pe : pes) {
+                dm.add(pe);
+            }
+        }
+        executor.execute("user.grant", dm.root());
     }
 
     static XmlDoc.Element describeActor(ServiceExecutor executor, XmlDoc.Element user) throws Throwable {
